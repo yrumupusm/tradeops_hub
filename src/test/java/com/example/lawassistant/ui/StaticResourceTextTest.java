@@ -80,6 +80,22 @@ class StaticResourceTextTest {
     }
 
     @Test
+    void adminPageShowsAReadableRecommendedActionForIndexIssues() throws IOException {
+        String adminJs = read("admin.js");
+        String styles = read("styles.css");
+
+        assertThat(adminJs).contains("function recommendedAction");
+        assertThat(adminJs).contains("색인 정리가 필요합니다.");
+        assertThat(adminJs).contains("긴급");
+        assertThat(adminJs).contains("확인 필요");
+        assertThat(adminJs).contains("참고");
+        assertThat(styles).contains(".action-card");
+        assertThat(styles).contains(".action-severity-urgent");
+        assertThat(styles).contains(".action-severity-check");
+        assertThat(styles).contains(".action-severity-info");
+    }
+
+    @Test
     void questionPageUsesKoreanProcessLabelsWithoutPublicScoreCopy() throws IOException {
         String app = read("app.js");
         String styles = read("styles.css");

@@ -78,8 +78,70 @@ function renderStatus(status) {
       <span>${escapeHtml(label)}</span>
       <strong>${escapeHtml(value)}</strong>
     </div>
-  `).join("");
+  `).join("") + renderRecommendedAction(status);
   updateReindexControl(Boolean(status.reindexEnabled));
+}
+
+function renderRecommendedAction(status) {
+  const action = recommendedAction(status);
+  return `
+    <aside class="metric-card action-card action-card-${action.severity}" aria-label="조치 안내" aria-live="polite">
+      <span>조치 안내</span>
+      <strong><span class="action-severity action-severity-${action.severity}">${escapeHtml(action.label)}</span></strong>
+      <p>${escapeHtml(action.title)}</p>
+      <small>${escapeHtml(action.description)}</small>
+    </aside>
+  `;
+}
+
+function recommendedAction(status) {
+  const failedRuns = status.recentFailures?.length ?? 0;
+  if (failedRuns > 0) {
+    return {
+      severity: "urgent",
+      label: "긴급",
+      title: "최근 수집 실패를 확인하세요.",
+      description: `최근 실패한 수집 작업 ${failedRuns}건의 원인을 확인하고 다시 처리해야 합니다.`,
+    };
+  }
+
+  if (status.indexStatus === "missing") {
+    return {
+      severity: "urgent",
+      label: "긴급",
+      title: "검색 색인이 준비되지 않았습니다.",
+      description: "현재 조문을 검색할 수 없으므로 수집 및 색인 작업이 필요합니다.",
+    };
+  }
+
+  if (status.indexStatus === "stale") {
+    const stored = Number(status.articlesCount ?? 0);
+    const indexed = Number(status.indexedArticlesCount ?? 0);
+    const difference = Math.abs(indexed - stored);
+    const direction = indexed > stored ? "남는 색인" : "미색인 조문";
+    return {
+      severity: "check",
+      label: "확인 필요",
+      title: "색인 정리가 필요합니다.",
+      description: `저장된 조문과 색인 조문 수가 ${difference}건 차이입니다. ${direction}을 다음 점검 때 정리하세요.`,
+    };
+  }
+
+  if (status.syncState?.lastForcePushDetectedAt) {
+    return {
+      severity: "check",
+      label: "확인 필요",
+      title: "원본 이력 변경을 확인하세요.",
+      description: "동기화 원본의 이력이 변경된 기록이 있어 다음 수집 전에 변경 내용을 확인하세요.",
+    };
+  }
+
+  return {
+    severity: "info",
+    label: "참고",
+    title: "즉시 필요한 조치가 없습니다.",
+    description: "색인과 저장된 조문 수가 일치합니다. 정기적으로 수집 상태를 확인하세요.",
+  };
 }
 
 function updateReindexControl(enabled) {

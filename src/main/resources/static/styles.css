@@ -521,6 +521,55 @@ textarea:focus {
     word-break: break-word;
 }
 
+.action-card {
+    min-height: 142px;
+}
+
+.action-card p {
+    margin: 9px 0 4px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.action-card small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.action-severity {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.action-severity-urgent {
+    border-color: #fecaca;
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.action-severity-check {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.action-severity-info {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
 .admin-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
