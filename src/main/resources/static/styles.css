@@ -707,6 +707,22 @@ tbody tr:last-child td {
     overflow: auto;
 }
 
+.law-browser-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.law-browser-panel .list-box {
+    flex: 1 1 240px;
+    max-height: none;
+    min-height: 240px;
+}
+
+.law-browser-panel:has(.detail-box:not(:empty)) .list-box {
+    flex: 0 1 240px;
+    max-height: 240px;
+}
+
 .list-item {
     width: 100%;
     border: 1px solid var(--border);
@@ -1128,6 +1144,11 @@ tbody tr:last-child td {
     .admin-grid,
     .metric-grid {
         grid-template-columns: 1fr;
+    }
+
+    .law-browser-panel .list-box {
+        flex: 0 1 auto;
+        max-height: 360px;
     }
 
     .page-heading {
