@@ -74,10 +74,16 @@ class StaticResourceTextTest {
         assertThat(adminJs).contains("data-trace-request-id");
         assertThat(adminJs).contains("/api/admin/agent-traces?requestId=");
         assertThat(adminJs).contains("loadAgentTraces(traceRequestIdInput.value)");
+        assertThat(adminJs).contains("searchLogStatusLabels");
+        assertThat(adminJs).contains("searchLogQuestionTypeLabels");
+        assertThat(adminJs).contains("search-log-table");
+        assertThat(adminJs).contains("search-log-question");
         assertThat(adminJs).contains("\uC0C9\uC778 \uC870\uBB38");
         assertThat(adminJs).contains("\uBBF8\uC0C9\uC778 \uC870\uBB38");
         assertThat(styles).contains(".trace-filter");
         assertThat(styles).contains(".trace-link");
+        assertThat(styles).contains(".search-log-table");
+        assertThat(styles).contains(".search-log-question");
         assertThat(styles).contains(".law-browser-panel .list-box");
     }
 

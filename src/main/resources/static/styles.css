@@ -794,6 +794,43 @@ tbody tr:last-child td {
     border-bottom: 0;
 }
 
+.search-log-table {
+    min-width: 840px;
+    table-layout: fixed;
+}
+
+.search-log-table th:nth-child(1) { width: 13%; }
+.search-log-table th:nth-child(2) { width: 14%; }
+.search-log-table th:nth-child(3) { width: 8%; }
+.search-log-table th:nth-child(4) { width: 8%; }
+.search-log-table th:nth-child(5) { width: 41%; }
+.search-log-table th:nth-child(6) { width: 6%; }
+.search-log-table th:nth-child(7) { width: 10%; }
+
+.search-log-table th,
+.search-log-table td {
+    vertical-align: middle;
+}
+
+.search-log-table td:not(.search-log-question) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-log-question {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: keep-all;
+}
+
+.search-log-question span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
 .list-box {
     display: grid;
     gap: 8px;

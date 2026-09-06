@@ -28,6 +28,21 @@ let reindexEnabled = false;
 let actionItems = [];
 reindexButton.disabled = true;
 
+const searchLogStatusLabels = {
+  OK: "정상",
+  LOW_CONFIDENCE: "확인 필요",
+  INSUFFICIENT_INFO: "정보 부족",
+  FAILED: "실패",
+};
+
+const searchLogQuestionTypeLabels = {
+  EXPLORATORY: "탐색형",
+  CONFIRMATORY: "확인형",
+  INSUFFICIENT: "정보 부족",
+  REVISION_COMPARE: "개정 비교",
+  METADATA: "정보 확인",
+};
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -52,6 +67,14 @@ function formatDateTime(value) {
 function shortText(value, max = 72) {
   const text = String(value ?? "-");
   return text.length > max ? `${text.slice(0, max)}...` : text;
+}
+
+function searchLogStatusLabel(value) {
+  return searchLogStatusLabels[value] ?? value ?? "-";
+}
+
+function searchLogQuestionTypeLabel(value) {
+  return searchLogQuestionTypeLabels[value] ?? value ?? "-";
 }
 
 async function fetchJson(url, options) {
@@ -209,8 +232,8 @@ function renderSearchLogs(response) {
     return;
   }
   searchLogsArea.innerHTML = `
-    <table>
-      <thead><tr><th>시간</th><th>요청</th><th>상태</th><th>기준일</th><th>질문</th><th>근거</th><th>질문 유형</th></tr></thead>
+    <table class="search-log-table">
+      <thead><tr><th>시간</th><th>요청</th><th>상태</th><th>기준일</th><th>질문</th><th>인용</th><th>질문 분류</th></tr></thead>
       <tbody>
         ${rows.map((row) => `
           <tr>
@@ -220,11 +243,11 @@ function renderSearchLogs(response) {
                 ${escapeHtml(shortText(row.requestId, 8))}
               </button>
             </td>
-            <td>${escapeHtml(row.status)}</td>
+            <td>${escapeHtml(searchLogStatusLabel(row.status))}</td>
             <td>${escapeHtml(row.asOf ?? "현재")}</td>
-            <td>${escapeHtml(shortText(row.questionPreview))}</td>
+            <td class="search-log-question" title="${escapeHtml(row.questionPreview ?? "")}"><span>${escapeHtml(shortText(row.questionPreview))}</span></td>
             <td>${escapeHtml(row.citedArticleCount ?? 0)}건</td>
-            <td>${escapeHtml(row.questionType ?? "-")}</td>
+            <td>${escapeHtml(searchLogQuestionTypeLabel(row.questionType))}</td>
           </tr>
         `).join("")}
       </tbody>
