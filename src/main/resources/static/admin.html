@@ -116,6 +116,25 @@
         </section>
     </main>
 
+    <dialog id="action-detail-dialog" class="action-detail-dialog" aria-labelledby="action-detail-title" aria-describedby="action-detail-description">
+        <div class="action-detail-header">
+            <div>
+                <p>조치 안내</p>
+                <h2 id="action-detail-title"></h2>
+            </div>
+            <form method="dialog">
+                <button class="secondary-button" type="submit">닫기</button>
+            </form>
+        </div>
+        <div class="action-detail-body">
+            <span id="action-detail-severity" class="action-severity"></span>
+            <p id="action-detail-description"></p>
+        </div>
+        <form method="dialog" class="action-detail-footer">
+            <button class="primary-button" type="submit">확인</button>
+        </form>
+    </dialog>
+
     <script src="/admin.js"></script>
 </body>
 </html>

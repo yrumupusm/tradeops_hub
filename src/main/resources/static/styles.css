@@ -525,19 +525,58 @@ textarea:focus {
     min-height: 142px;
 }
 
-.action-card p {
-    margin: 9px 0 4px;
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.45;
+.action-list {
+    display: grid;
+    gap: 4px;
+    margin-top: 8px;
 }
 
-.action-card small {
-    display: block;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.5;
+.action-detail-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 8px;
+    padding: 6px 4px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: left;
+}
+
+.action-detail-button:hover {
+    background: var(--surface-muted);
+}
+
+.action-detail-button:focus-visible {
+    outline: 3px solid rgba(29, 78, 216, 0.28);
+    outline-offset: 2px;
+}
+
+.action-dot {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+}
+
+.action-dot-urgent {
+    background: var(--danger);
+}
+
+.action-dot-check {
+    background: #d97706;
+}
+
+.action-dot-info {
+    background: #2563eb;
 }
 
 .action-severity {
@@ -568,6 +607,61 @@ textarea:focus {
     border-color: #bfdbfe;
     background: #eff6ff;
     color: #1d4ed8;
+}
+
+.action-detail-dialog {
+    width: min(520px, calc(100% - 32px));
+    max-width: 520px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0;
+    color: var(--text);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+.action-detail-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.action-detail-header,
+.action-detail-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+}
+
+.action-detail-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.action-detail-header p {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.action-detail-header h2 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.4;
+}
+
+.action-detail-body {
+    padding: 20px;
+}
+
+.action-detail-body p {
+    margin: 14px 0 0;
+    color: var(--text);
+    line-height: 1.7;
+}
+
+.action-detail-footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
 }
 
 .admin-grid {
