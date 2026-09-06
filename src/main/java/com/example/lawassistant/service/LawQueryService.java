@@ -14,6 +14,8 @@ import com.example.lawassistant.dto.LawRevisionListResponse;
 import com.example.lawassistant.dto.LawSummaryDto;
 import com.example.lawassistant.repository.ArticleRepository;
 import com.example.lawassistant.repository.LawRepository;
+import com.example.lawassistant.repository.SnapshotVersionRepository;
+import com.example.lawassistant.domain.enums.SnapshotStatus;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -27,10 +29,16 @@ public class LawQueryService {
 
     private final LawRepository lawRepository;
     private final ArticleRepository articleRepository;
+    private final SnapshotVersionRepository snapshotVersionRepository;
 
-    public LawQueryService(LawRepository lawRepository, ArticleRepository articleRepository) {
+    public LawQueryService(
+            LawRepository lawRepository,
+            ArticleRepository articleRepository,
+            SnapshotVersionRepository snapshotVersionRepository
+    ) {
         this.lawRepository = lawRepository;
         this.articleRepository = articleRepository;
+        this.snapshotVersionRepository = snapshotVersionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -42,9 +50,14 @@ public class LawQueryService {
     public LawListResponse findLaws(String keyword, int page, int size) {
         int safePage = Math.max(1, page);
         int safeSize = Math.max(1, Math.min(100, size));
-        List<Law> laws = keyword == null || keyword.isBlank()
-                ? lawRepository.findAll()
-                : lawRepository.findByTitleContainingIgnoreCaseOrderByTitleAsc(keyword);
+        var latestSnapshot = snapshotVersionRepository
+                .findFirstByStatusOrderByIndexedAtDesc(SnapshotStatus.INDEXED);
+        List<Law> laws = latestSnapshot
+                .map(snapshot -> keyword == null || keyword.isBlank()
+                        ? lawRepository.findBySnapshotVersionId(snapshot.getId())
+                        : lawRepository.findBySnapshotVersionIdAndTitleContainingIgnoreCase(
+                                snapshot.getId(), keyword))
+                .orElseGet(List::of);
         laws = laws.stream()
                 .sorted(Comparator.comparing(Law::getTitle).thenComparing(Law::getId))
                 .toList();

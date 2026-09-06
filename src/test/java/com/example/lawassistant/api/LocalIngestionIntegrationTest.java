@@ -139,6 +139,11 @@ class LocalIngestionIntegrationTest {
 
         Article current = articleRepository.searchByKeyword("추가 확인 절차").get(0);
 
+        mockMvc.perform(get("/api/laws").param("page", "1").param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items.length()").value(1));
+
         mockMvc.perform(get("/api/articles/{id}/history", current.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lawTitle").value("테스트수출법"))

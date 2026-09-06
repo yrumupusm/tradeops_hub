@@ -246,6 +246,8 @@ Response:
 
 ## GET /api/laws
 
+Returns laws from the most recently completed (`INDEXED`) snapshot only. Older snapshots remain available through article history and comparison endpoints, but are not duplicated in the default law list.
+
 Query:
 
 ```text
