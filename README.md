@@ -57,4 +57,10 @@ flowchart LR
 .\scripts\verify-local.ps1 -MavenPath C:\path\to\mvn.cmd
 ```
 
-로컬 검증은 백엔드 테스트와 프런트엔드 타입 검사를 실행합니다. 통합 테스트 DB는 H2이며 PostgreSQL 실행 검증을 대신하지 않습니다. PostgreSQL 월별 집계 쿼리, 검토 기록의 권한·트랜잭션 처리, 실행 시나리오 자동 검증은 보완 중입니다. [작업 목록](tasks/todo.md)과 [arc42의 기술 부채](docs/arc42.md#11-위험과-기술-부채)에서 현재 범위를 확인할 수 있습니다.
+로컬 검증은 백엔드 테스트, 프런트엔드 타입 검사, 검증 도구 테스트를 실행합니다. 실제 PostgreSQL 검증은 다음 명령으로 실행합니다.
+
+```powershell
+.\scripts\verify-final.ps1 -MavenPath C:\path\to\mvn.cmd
+```
+
+최종 게이트는 별도 PostgreSQL·API·웹을 시작해 11개 고정 시나리오와 저장 결과를 확인하고, 생성한 프로세스와 임시 DB를 정리합니다. 실행 결과는 Git에서 제외된 `artifacts/final/`에 저장됩니다. 기존 로컬 DB는 사용하지 않습니다. 가져오기 이력 조회, 일반 로그인 화면, 외부 원본 연결 등 남은 범위는 [작업 목록](tasks/todo.md)에서 관리합니다.

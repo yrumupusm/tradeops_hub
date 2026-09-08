@@ -39,6 +39,10 @@ Invoke-Step "Repository safety and scenario validation" {
     foreach ($path in $required) { Assert-File $path }
     $scenarios = Get-Content -LiteralPath "harness\scenarios.json" -Raw -Encoding UTF8 | ConvertFrom-Json
     if (@($scenarios).Count -lt 4) { throw "Expected at least four fixed scenarios." }
+    if (@($scenarios.id | Select-Object -Unique).Count -ne @($scenarios).Count) { throw "Scenario IDs must be unique." }
+    foreach ($scenario in $scenarios) {
+        if ($scenario.id -notmatch '^[a-z0-9-]+$' -or @($scenario.checks).Count -eq 0) { throw "Each scenario needs an ID and assertion list." }
+    }
     foreach ($path in @('.env', 'artifacts/probe.json', 'frontend/tsconfig.tsbuildinfo')) {
         git check-ignore -q -- $path
         if ($LASTEXITCODE -ne 0) { throw "Local configuration or generated file is not ignored: $path" }
@@ -49,6 +53,11 @@ Invoke-Step "Repository safety and scenario validation" {
         if ($path -match '(^|/)\.env($|\.)' -and $path -notmatch '(^|/)\.env\.example$') { throw "Local environment file is tracked." }
         if ($path -match '(^artifacts/|/node_modules/|/target/|/\.next/|\.tsbuildinfo$)') { throw "Generated file is tracked: $path" }
     }
+}
+
+Invoke-Step "Verification tooling tests" {
+    & node --test scripts/verification.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw "Verification tooling tests failed." }
 }
 
 if (-not $SkipBackend) {

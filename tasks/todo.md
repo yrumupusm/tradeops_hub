@@ -19,9 +19,29 @@
 - [x] Implement operator-triggered update endpoint with a concrete local source adapter.
 - [x] Implement watchlist search, source/country filters, and change-review APIs.
 - [x] Implement trade-transaction CSV import validation, duplicate detection, and persisted import history.
-- [x] Implement transaction search and monthly aggregate API (PostgreSQL compatibility remains below).
-- [x] Add screening-review and audit writes (authorization and atomicity remain below).
-- [ ] **In progress:** Implement runtime scenario/evidence gates.
+- [x] Implement transaction search and PostgreSQL-compatible monthly aggregate API.
+- [x] Add operator/admin screening-review and atomic audit writes.
+- [x] Implement runtime scenario/evidence gates.
+
+### Completed delivery — runtime verification
+
+- [x] Correct PostgreSQL transaction search, monthly aggregation and generated import IDs; add focused integration tests.
+- [x] Enforce screening roles and atomically persist review/audit records through a service and repository.
+- [x] Correct console failure messages and remove unused aggregate-request coupling.
+- [x] Implement fixed runtime scenarios and allowlisted JSON evidence; reject stale/incomplete evidence.
+- [x] Add a final gate that starts an isolated PostgreSQL/API/web stack, verifies it, and cleans up its own resources.
+- [x] Verify failure propagation, run the local and isolated runtime gates, and exercise the browser workflow.
+- [x] Update API/architecture/runbook documents and prepare verified commits for GitHub.
+
+### Runtime verification — 2026-09-08
+
+- Focused transaction, screening, authentication and watchlist tests passed.
+- Final local gate: 30 backend tests, 8 verification-tool tests and frontend type checking passed.
+- API packaging and frontend production build passed.
+- Isolated PostgreSQL: 11 HTTP scenarios, evidence validation and persisted row/audit counts passed.
+- Default final gate cleaned up its own API, web and temporary database; existing application volumes were not used.
+- Playwright: login, current data, idempotent rerun, real missing-source failure with list preservation, and zero console errors confirmed.
+- Evidence and browser captures remain ignored under artifacts/.
 
 ## Optional external-source adapter — defer until MVP is complete
 
@@ -38,7 +58,7 @@
 - [ ] Add screenshots using fictional data only.
 - [x] Document setup, local sample accounts, and operational checks.
 
-### Verification — 2026-09-08
+### Initial publication verification — 2026-09-08
 
 - `scripts/verify-local.ps1`: 18 backend tests passed and frontend type check passed.
 - `npm run build` in `frontend`: passed; generated HTML retains the fictional-data indicator and uses workspace/product copy.
@@ -47,10 +67,11 @@
 
 ## Implementation gaps found during architecture review
 
-- [ ] Replace H2-specific monthly aggregation SQL and verify against PostgreSQL.
-- [ ] Move screening writes into a transactional service/repository and enforce operator/admin roles.
+- [x] Replace H2-specific monthly aggregation SQL and verify against PostgreSQL.
+- [x] Move screening writes into a transactional service/repository and enforce operator/admin roles.
 - [ ] Add import history/rejection read APIs and complete audit coverage for mutations.
 - [ ] Implement a source interface and scheduled execution (the current adapter is concrete and manually triggered).
 - [ ] Verify concurrent source updates, database-failure run tracking, and snapshot immutability enforcement.
-- [ ] Complete general login, list filter/paging controls, and safe failed-run messages in the console.
+- [ ] Complete general login and list filter/paging controls in the console.
 - [ ] Extend CSV parsing/input limits and database-exception coverage.
+- [ ] Validate screening target references against stored transactions and source records.
