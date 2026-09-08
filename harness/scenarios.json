@@ -108,11 +108,12 @@
   },
   {
     "id": "console-product-copy",
-    "description": "Served HTML describes operations and workspace access, retaining the fictional-data indicator.",
+    "description": "Served HTML uses Korean navigation and workspace access, retaining the fictional-data indicator.",
     "checks": [
       "web-ready",
       "workspace-access",
       "fictional-data",
+      "korean-language",
       "product-copy"
     ]
   }

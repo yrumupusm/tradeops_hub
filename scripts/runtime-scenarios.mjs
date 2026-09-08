@@ -166,9 +166,10 @@ const handlers = {
     },
     "console-product-copy": async () => {
         const html = await request("/", { web: true });
-        check("web-ready", html.includes("TradeOps"));
-        check("workspace-access", html.includes("WORKSPACE ACCESS"));
-        check("fictional-data", html.includes("Fictional data only"));
+        check("web-ready", html.includes("트레이드옵스"));
+        check("workspace-access", html.includes("업무 공간 접속") && html.includes("운영자로 로그인"));
+        check("fictional-data", html.includes("가상 데이터 사용"));
+        check("korean-language", html.includes('lang="ko"') && html.includes("검토 대상 목록 운영") && !/Watchlist updates|Operator sign in|Sign in as operator/.test(html));
         check("product-copy", !/Portfolio demonstration|DEMO ACCESS|for portfolio use/.test(html));
     }
 };

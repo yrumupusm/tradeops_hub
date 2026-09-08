@@ -75,3 +75,14 @@
 - [ ] Complete general login and list filter/paging controls in the console.
 - [ ] Extend CSV parsing/input limits and database-exception coverage.
 - [ ] Validate screening target references against stored transactions and source records.
+
+## Korean console localization
+
+- [x] Translate navigation, actions, metadata, states, and safe errors into Korean.
+- [x] Render field changes in Korean and preserve source identifiers.
+- [x] Update the console acceptance scenario and runbook.
+- [x] Verify and rebuild the running web console; include the verified change in the repository release.
+
+- Verification: local gate with -SkipBackend passed (8 verification-tool tests and frontend type checking); production build passed.
+- Served Korean HTML and real operator login/empty states passed. Playwright mocked responses verified translated field differences, success, duplicate, source failure, authorization, unknown/network/login errors, and desktop/mobile layout.
+- Browser checks did not create watchlist records. Backend tests and the full PostgreSQL runtime suite were not repeated for this presentation-only change.
