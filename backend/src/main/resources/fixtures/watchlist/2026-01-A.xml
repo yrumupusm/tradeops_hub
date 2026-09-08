@@ -1,0 +1,28 @@
+<watchlist provider="FICTIONAL_WATCHLIST_PROVIDER" version="2026-01-A" dataOrigin="FICTIONAL">
+  <entity externalId="FCP-1001" countryCode="KR" listingReason="TRADE_REVIEW" status="ACTIVE">
+    <entityName>EMBER MERIDIAN WORKS</entityName>
+    <aliases>
+      <alias>EMBER MERIDIAN</alias>
+      <alias>EMW</alias>
+    </aliases>
+  </entity>
+  <entity externalId="FCP-1002" countryCode="SG" listingReason="DOCUMENT_REVIEW" status="ACTIVE">
+    <entityName>NORTHLINE BEACON LTD</entityName>
+    <aliases>
+      <alias>NORTHLINE BEACON</alias>
+    </aliases>
+  </entity>
+  <entity externalId="FCP-1003" countryCode="AE" listingReason="OWNERSHIP_REVIEW" status="ACTIVE">
+    <entityName>ARCLIGHT RELAY COMPANY</entityName>
+    <aliases>
+      <alias>ARCLIGHT RELAY</alias>
+      <alias>ARC RELAY</alias>
+    </aliases>
+  </entity>
+  <entity externalId="FCP-1004" countryCode="DE" listingReason="TRADE_REVIEW" status="ACTIVE">
+    <entityName>PINEWARD DYNAMICS</entityName>
+    <aliases>
+      <alias>PINEWARD</alias>
+    </aliases>
+  </entity>
+</watchlist>

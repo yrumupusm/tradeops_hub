@@ -1,0 +1,30 @@
+server:
+  port: ${API_PORT:8081}
+  error:
+    include-message: never
+    include-stacktrace: never
+spring:
+  application:
+    name: tradeops-api
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:tradeops_hub}
+    username: ${POSTGRES_USER:tradeops}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+management:
+  endpoint:
+    health:
+      show-details: never
+tradeops:
+  demo-users:
+    enabled: ${SEED_DEMO_USERS:false}
+  security:
+    jwt-issuer: ${JWT_ISSUER:tradeops-hub}
+    jwt-secret: ${JWT_SECRET}
+    jwt-expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}

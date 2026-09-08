@@ -1,0 +1,38 @@
+[
+  {
+    "id": "operator-creates-first-watchlist-snapshot",
+    "description": "An operator runs fictional version A; its completed snapshot creates only added records and becomes current.",
+    "requires": ["authentication", "watchlist-run-api", "fixture-data"],
+    "expected": {"status": "COMPLETED", "addedRowsAtLeast": 1, "correlationId": true}
+  },
+  {
+    "id": "operator-reviews-watchlist-version-diff",
+    "description": "Version B is compared to version A and exposes added, changed, and removed records.",
+    "requires": ["watchlist-run-api", "watchlist-change-api", "fixture-data"],
+    "expected": {"status": "COMPLETED", "addedRowsAtLeast": 1, "changedRowsAtLeast": 1, "removedRowsAtLeast": 1}
+  },
+  {
+    "id": "same-payload-is-idempotent",
+    "description": "Re-running the same fictional source version does not duplicate a snapshot or change records.",
+    "requires": ["watchlist-run-api", "idempotency"],
+    "expected": {"duplicateSnapshot": false, "duplicateChangeRecords": false}
+  },
+  {
+    "id": "failed-source-run-preserves-current-view",
+    "description": "An invalid fictional payload produces a safe failed run and cannot change the current list.",
+    "requires": ["watchlist-run-api", "validation"],
+    "expected": {"status": "FAILED", "safeErrorCode": true, "currentViewUnchanged": true}
+  },
+  {
+    "id": "viewer-cannot-trigger-watchlist-run",
+    "description": "A viewer receives 403 when attempting to run a watchlist update but can read the current list.",
+    "requires": ["authentication", "authorization", "watchlist-run-api"],
+    "expected": {"mutationHttpStatus": 403, "readHttpStatus": 200}
+  },
+  {
+    "id": "console-product-copy",
+    "description": "The console describes watchlist operations and workspace access while keeping the fictional-data indicator visible.",
+    "requires": ["web-console"],
+    "expected": {"portfolioPromotionVisible": false, "fictionalDataIndicatorVisible": true, "workspaceAccessLabel": "WORKSPACE ACCESS"}
+  }
+]
