@@ -23,7 +23,7 @@ source version -> validation -> snapshot + run record
 - Transaction CSV import validation, duplicate handling, stored rejection metadata, transaction search and monthly aggregation APIs.
 - A screening-review write API with actor, score, disposition, timestamp and correlation ID.
 
-These capabilities have implementation gaps. The monthly aggregation currently uses H2-specific SQL; screening writes still need role restrictions and a service transaction. Import/rejection history and audit read APIs are not implemented. See [arc42](docs/arc42.md) and [tasks](tasks/todo.md) for the current status.
+Transaction queries use PostgreSQL/H2-compatible SQL, and screening writes enforce operator/admin access with transactional review/audit persistence. Import/rejection history and audit read APIs are not implemented. See [arc42](docs/arc42.md) and [tasks](tasks/todo.md) for the current status.
 
 ## Architecture boundaries
 
@@ -32,7 +32,7 @@ These capabilities have implementation gaps. The monthly aggregation currently u
 - The current concrete `FictionalWatchlistSource` reads classpath fixtures. A common source interface and scheduled execution remain future work.
 - `WatchlistComparator` compares stable keys and canonical hashes.
 - PostgreSQL stores runs, snapshots, changes, transactions, reviews and audit events. The current view reads the latest snapshot; it is not a separate mutable table.
-- Controllers should delegate business rules to application services and data access to repositories. Existing direct JDBC paths are tracked as technical debt.
+- Controllers should delegate business rules to application services and data access to repositories. Transaction queries and screening use repositories; the import service's direct JDBC path remains technical debt.
 
 See [C4](docs/architecture/c4.md), [ADRs](docs/adr/README.md), and [API contract](docs/api-contract.md).
 

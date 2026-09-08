@@ -1,6 +1,7 @@
 package io.tradeops.watchlist;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,6 +76,34 @@ class WatchlistRunIntegrationTest {
         run(login("operator@tradeops.test"), "2099-01-Z", "XML").andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("FAILED")).andExpect(jsonPath("$.safeErrorCode").value("FIXTURE_NOT_FOUND"));
         org.junit.jupiter.api.Assertions.assertEquals(0, snapshots.count());
+    }
+
+    @Test
+    void invalidPageParametersReturnSafeErrors() throws Exception {
+        String token = login("operator@tradeops.test");
+        for (String query : new String[]{"page=-1", "size=101", "page=invalid"}) {
+            mockMvc.perform(get("/api/v1/watchlist/entities?" + query).header("Authorization", "Bearer " + token))
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                    .andExpect(jsonPath("$.trace").doesNotExist());
+        }
+    }
+
+    @Test
+    void latestSnapshotQueriesSupportAbsentAndCombinedFilters() throws Exception {
+        String token = login("operator@tradeops.test");
+        run(token, "2026-01-A", "XML").andExpect(status().isOk());
+        run(token, "2026-02-B", "CSV").andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/watchlist/entities").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(4));
+        mockMvc.perform(get("/api/v1/watchlist/entities").param("search", " ember ").param("country", "kr")
+                        .param("status", "active").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.items[0].externalId").value("FCP-1001"));
+        mockMvc.perform(get("/api/v1/watchlist/changes").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3));
+        mockMvc.perform(get("/api/v1/watchlist/changes").param("type", "changed").param("search", "northline")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1));
     }
 
     private org.springframework.test.web.servlet.ResultActions run(String token, String version, String format) throws Exception {

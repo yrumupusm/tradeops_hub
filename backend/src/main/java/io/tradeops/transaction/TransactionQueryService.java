@@ -1,2 +1,33 @@
-package io.tradeops.transaction;import java.math.BigDecimal;import java.sql.Date;import java.util.*;import org.springframework.jdbc.core.JdbcTemplate;import org.springframework.stereotype.Service;
-@Service public class TransactionQueryService{private final JdbcTemplate jdbc;public TransactionQueryService(JdbcTemplate j){jdbc=j;}public List<Row> search(String term,String country){String q="select transaction_id,transaction_date,counterparty_name,country_code,amount_usd,currency from trade_transactions where (? is null or lower(transaction_id) like lower(?) or lower(counterparty_name) like lower(?)) and (? is null or country_code=?) order by transaction_date desc, id desc limit 100";String t=term==null||term.isBlank()?null:term.trim();String pattern=t==null?null:"%"+t+"%";String c=country==null||country.isBlank()?null:country.trim().toUpperCase(Locale.ROOT);return jdbc.query(q,(rs,n)->new Row(rs.getString(1),rs.getDate(2).toLocalDate(),rs.getString(3),rs.getString(4),rs.getBigDecimal(5),rs.getString(6)),t,pattern,pattern,c,c);}public List<Month> monthly(){return jdbc.query("select formatdatetime(transaction_date,'yyyy-MM'),count(*),sum(amount_usd) from trade_transactions group by formatdatetime(transaction_date,'yyyy-MM') order by 1",(rs,n)->new Month(rs.getString(1),rs.getInt(2),rs.getBigDecimal(3)));}public record Row(String transactionId,java.time.LocalDate transactionDate,String counterpartyName,String countryCode,BigDecimal amountUsd,String currency){}public record Month(String month,int transactionCount,BigDecimal totalAmountUsd){}}
+package io.tradeops.transaction;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Locale;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TransactionQueryService {
+    private final TransactionQueryRepository repository;
+
+    public TransactionQueryService(TransactionQueryRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Row> search(String term, String country) {
+        String search = term == null || term.isBlank() ? null : term.trim();
+        String countryCode = country == null || country.isBlank() ? null : country.trim().toUpperCase(Locale.ROOT);
+        return repository.search(search, countryCode);
+    }
+
+    public List<Month> monthly() {
+        return repository.monthly().stream()
+                .map(row -> new Month(YearMonth.of(row.year(), row.month()).toString(), row.count(), row.amount()))
+                .toList();
+    }
+
+    public record Row(String transactionId, LocalDate transactionDate, String counterpartyName,
+                      String countryCode, BigDecimal amountUsd, String currency) { }
+    public record Month(String month, int transactionCount, BigDecimal totalAmountUsd) { }
+}

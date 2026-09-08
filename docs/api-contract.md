@@ -6,9 +6,9 @@
 
 - 기본 경로: `/api/v1`. JSON 필드는 camelCase입니다.
 - 인증: `Authorization: Bearer <token>`. 로그인과 상태 조회는 인증 없이 접근합니다.
-- 응답 추적: `X-Correlation-Id`. 요청 값은 8–64자의 영숫자·하이픈만 수용하며 나머지는 새 UUID로 대체합니다.
+- 응답 추적: `X-Correlation-Id`. 보안 검사 전에 ID를 부여하므로 401·403 응답에도 헤더와 오류 본문의 ID가 일치합니다. 요청 값은 8–64자의 영숫자·하이픈만 수용하며 나머지는 새 UUID로 대체합니다.
 - 잘못된 로그인은 `401 AUTHENTICATION_FAILED`, 인증 누락은 `401 AUTHENTICATION_REQUIRED`, 역할 부족은 `403 ACCESS_DENIED`입니다.
-- 알 수 없는 JSON 필드, 잘못된 enum과 본문 검증 실패는 `400 INVALID_REQUEST`입니다. 쿼리 검증·DB 예외 전체가 동일 오류 형식으로 매핑되지는 않습니다.
+- 알 수 없는 JSON 필드, 잘못된 enum과 본문 검증 실패는 `400 INVALID_REQUEST`입니다. 잘못된 페이지 범위·타입도 같은 형식으로 응답합니다. 데이터 접근 실패는 `503 PERSISTENCE_UNAVAILABLE`, 지원하지 않는 HTTP 메서드·미디어 타입과 누락된 multipart 항목은 기존 4xx 상태를 유지하며 안전한 `INVALID_REQUEST` 본문으로 응답합니다. 그 밖의 컨트롤러 예외는 `500 INTERNAL_ERROR`이며 원인 문자열과 스택을 응답에 포함하지 않습니다.
 - 갱신·가져오기 업무 실패는 HTTP 200 본문의 `status=FAILED`일 수 있습니다. HTTP 코드만으로 성공을 판단하지 않습니다.
 
 ## 엔드포인트
@@ -26,7 +26,7 @@
 | POST `/imports` | ADMIN, OPERATOR | multipart `file` |
 | GET `/transactions` | 인증 사용자 | `search`, `country` |
 | GET `/transactions/monthly-summary` | 인증 사용자 | 월별 건수·금액 |
-| POST `/screening-reviews` | 인증 사용자; 역할 제한 보완 필요 | 거래·목록 식별자, 점수, 처분 |
+| POST `/screening-reviews` | ADMIN, OPERATOR | 거래·목록 식별자, 점수, 처분 |
 
 `/actuator/health`도 공개 상태 엔드포인트이며 `/api/v1` 경로 바깥에 있습니다. 상세 구성 정보는 숨깁니다.
 
@@ -58,7 +58,7 @@
 | entities | `externalId, entityName, aliases, countryCode, listingReason, status, sourceVersion` |
 | changes | `type, externalId, entityName, differencesJson, sourceVersion` |
 
-entities·changes는 최신 스냅샷만 조회합니다. 미지원 공급자 또는 스냅샷이 없으면 빈 페이지입니다. `differencesJson`은 객체가 아닌 JSON 문자열이며 변경 필드별 `before`·`after`를 담습니다. 추가·삭제 항목의 차이 값은 `"{}"`입니다.
+entities·changes는 최신 스냅샷만 조회합니다. 미지원 공급자 또는 스냅샷이 없으면 빈 페이지입니다. `differencesJson`은 객체가 아닌 JSON 문자열이며 변경 필드별 `previousValue`·`currentValue`를 담습니다. 추가·삭제 항목의 차이 값은 `"{}"`입니다.
 
 ## 거래 가져오기와 조회
 
@@ -70,7 +70,7 @@ transactionId,transactionDate,counterpartyName,countryCode,amountUsd,currency,da
 
 각 필드 규칙은 [데이터 사전](../data/fixtures/transaction-data-dictionary.md)을 참조합니다. 결과는 `runId, status, acceptedCount, rejectedCount, duplicateCount, safeErrorCode, correlationId`입니다. 일부 행 거절·중복은 `COMPLETED_WITH_ERRORS`이며 행 번호와 오류 코드가 DB에 저장됩니다. 같은 파일은 새 실행 없이 `FAILED / DUPLICATE_FILE`과 null `runId`를 반환합니다. 가져오기 이력과 거절 행의 조회 API는 아직 없습니다.
 
-거래 검색은 `transactionId, transactionDate, counterpartyName, countryCode, amountUsd, currency`의 배열을 반환합니다. 날짜·ID 내림차순 최대 100건이며 페이지 메타데이터는 없습니다. 월별 집계는 `month, transactionCount, totalAmountUsd`의 배열입니다. 현재 집계 SQL은 H2 전용이므로 PostgreSQL 호환성 보완이 필요합니다.
+거래 검색은 `transactionId, transactionDate, counterpartyName, countryCode, amountUsd, currency`의 배열을 반환합니다. 날짜·ID 내림차순 최대 100건이며 페이지 메타데이터는 없습니다. 월별 집계는 `month, transactionCount, totalAmountUsd`의 배열입니다. 연도·월별 `EXTRACT` 집계로 PostgreSQL과 H2에서 동일한 `YYYY-MM` 응답을 제공합니다.
 
 ## 검토 기록
 
@@ -85,7 +85,7 @@ transactionId,transactionDate,counterpartyName,countryCode,amountUsd,currency,da
 
 식별자는 비어 있지 않아야 하고 점수는 0–1입니다. 처분 값은 `CONFIRMED_MATCH`, `CLEARED`, `NEEDS_FOLLOW_UP`입니다. 응답은 `{status:"RECORDED", correlationId}`입니다. 사용자와 생성 시각은 서버에서 저장하며 자동 매칭 계산은 없습니다.
 
-현재 이 경로는 조회자도 쓸 수 있습니다. 검토와 감사 저장이 하나의 트랜잭션이 아니며 대상 식별자 참조 검증도 없습니다. `disposition`은 패턴 검사만 있어 null 본문 값에 대한 안전한 400 응답도 보완 대상입니다.
+조회자는 403, 인증 없는 요청은 401입니다. `disposition`의 null·빈 값·잘못된 값과 범위를 벗어난 점수는 `400 INVALID_REQUEST`입니다. 거래 ID는 최대 100자, 목록 ID는 최대 160자입니다. 검토와 감사 이벤트를 하나의 서비스 트랜잭션으로 저장하며, 감사 이벤트의 `entityId`는 생성된 검토 ID를 가리킵니다. 대상 식별자의 실제 존재 여부 검증은 아직 없습니다.
 
 ## 미구현 계약
 

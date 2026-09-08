@@ -7,7 +7,7 @@
 | [0001](0001-web-api-relational-storage.md) | 웹·API 분리와 관계형 데이터 저장 | 채택 | 2026-09-08 |
 | [0002](0002-versioned-snapshots.md) | 원본 버전별 스냅샷과 체크섬 기반 중복 처리 | 채택 | 2026-09-08 |
 | [0003](0003-local-source-boundary.md) | 재현 가능한 로컬 원본과 수집 경계 | 채택 | 2026-09-08 |
-| [0004](0004-authorization-and-traceability.md) | 서버 권한 제어와 요청 단위 추적 | 채택, 적용 보완 중 | 2026-09-08 |
+| [0004](0004-authorization-and-traceability.md) | 서버 권한 제어와 요청 단위 추적 | 채택 | 2026-09-08 |
 
 새 결정은 `NNNN-short-title.md`로 추가합니다. 기존 결정을 대체할 때는 원문을 삭제하지 않고 상태와 대체 ADR 링크를 갱신합니다.
 

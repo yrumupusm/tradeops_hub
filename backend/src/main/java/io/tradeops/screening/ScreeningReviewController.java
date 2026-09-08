@@ -1,2 +1,42 @@
-package io.tradeops.screening;import io.tradeops.web.CorrelationIdFilter;import jakarta.servlet.http.HttpServletRequest;import jakarta.validation.Valid;import jakarta.validation.constraints.*;import org.springframework.jdbc.core.JdbcTemplate;import org.springframework.security.core.Authentication;import org.springframework.web.bind.annotation.*;
-@RestController @RequestMapping("/api/v1/screening-reviews") public class ScreeningReviewController{private final JdbcTemplate jdbc;public ScreeningReviewController(JdbcTemplate j){jdbc=j;}@PostMapping public Result decide(@Valid @RequestBody Request r,Authentication a,HttpServletRequest h){String cid=h.getAttribute(CorrelationIdFilter.REQUEST_ATTRIBUTE).toString();jdbc.update("insert into screening_reviews(transaction_id,watchlist_external_id,match_score,disposition,actor_username,correlation_id) values(?,?,?,?,?,?)",r.transactionId(),r.watchlistExternalId(),r.matchScore(),r.disposition(),a.getName(),cid);jdbc.update("insert into audit_events(correlation_id,actor_username,event_type,entity_type,entity_id,detail) values(?,?,?,?,?,null)",cid,a.getName(),"SCREENING_REVIEW_RECORDED","SCREENING_REVIEW",r.transactionId());return new Result("RECORDED",cid);}public record Request(@NotBlank String transactionId,@NotBlank String watchlistExternalId,@NotNull @DecimalMin("0.0") @DecimalMax("1.0") java.math.BigDecimal matchScore,@Pattern(regexp="CONFIRMED_MATCH|CLEARED|NEEDS_FOLLOW_UP") String disposition){}public record Result(String status,String correlationId){}}
+package io.tradeops.screening;
+
+import io.tradeops.web.CorrelationIdFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/screening-reviews")
+public class ScreeningReviewController {
+    private final ScreeningReviewService service;
+
+    public ScreeningReviewController(ScreeningReviewService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public Result decide(@Valid @RequestBody Request request, Authentication auth, HttpServletRequest http) {
+        String correlationId = http.getAttribute(CorrelationIdFilter.REQUEST_ATTRIBUTE).toString();
+        service.record(request.transactionId(), request.watchlistExternalId(), request.matchScore(),
+                request.disposition(), auth.getName(), correlationId);
+        return new Result("RECORDED", correlationId);
+    }
+
+    public record Request(
+            @NotBlank @Size(max = 100) String transactionId,
+            @NotBlank @Size(max = 160) String watchlistExternalId,
+            @NotNull @DecimalMin("0.0") @DecimalMax("1.0") BigDecimal matchScore,
+            @NotBlank @Pattern(regexp = "CONFIRMED_MATCH|CLEARED|NEEDS_FOLLOW_UP") String disposition) { }
+    public record Result(String status, String correlationId) { }
+}

@@ -2,6 +2,7 @@ package io.tradeops.auth;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -71,6 +72,33 @@ class AuthControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                 .andExpect(header().exists("X-Correlation-Id"));
+    }
+
+    @Test
+    void securityDenialsRetainCorrelationId() throws Exception {
+        String correlationId = "auth-denied-0001";
+        mockMvc.perform(get("/api/v1/auth/me").header("X-Correlation-Id", correlationId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("X-Correlation-Id", correlationId))
+                .andExpect(jsonPath("$.correlationId").value(correlationId));
+        String token = login("viewer@tradeops.test", "portfolio-demo");
+        mockMvc.perform(get("/api/v1/admin/status").header("Authorization", "Bearer " + token)
+                        .header("X-Correlation-Id", correlationId))
+                .andExpect(status().isForbidden())
+                .andExpect(header().string("X-Correlation-Id", correlationId))
+                .andExpect(jsonPath("$.correlationId").value(correlationId));
+    }
+
+    @Test
+    void frameworkClientErrorsKeepTheirHttpStatus() throws Exception {
+        String token = login("operator@tradeops.test", "portfolio-demo");
+        mockMvc.perform(multipart("/api/v1/imports").header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+        mockMvc.perform(post("/api/v1/imports").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnsupportedMediaType()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+        mockMvc.perform(get("/api/v1/screening-reviews").header("Authorization", "Bearer " + token))
+                .andExpect(status().isMethodNotAllowed()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     private String login(String username, String password) throws Exception {

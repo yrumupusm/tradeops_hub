@@ -1,38 +1,119 @@
 [
   {
+    "id": "health-and-auth-safe-errors",
+    "description": "Health, anonymous access and failed login expose only safe response fields.",
+    "checks": [
+      "health",
+      "health-fields",
+      "anonymous-denied",
+      "login-denied",
+      "safe-error-fields"
+    ]
+  },
+  {
     "id": "operator-creates-first-watchlist-snapshot",
-    "description": "An operator runs fictional version A; its completed snapshot creates only added records and becomes current.",
-    "requires": ["authentication", "watchlist-run-api", "fixture-data"],
-    "expected": {"status": "COMPLETED", "addedRowsAtLeast": 1, "correlationId": true}
+    "description": "A fresh source creates four added rows and becomes current.",
+    "checks": [
+      "completed",
+      "counts",
+      "current-version",
+      "four-entities"
+    ]
   },
   {
     "id": "operator-reviews-watchlist-version-diff",
-    "description": "Version B is compared to version A and exposes added, changed, and removed records.",
-    "requires": ["watchlist-run-api", "watchlist-change-api", "fixture-data"],
-    "expected": {"status": "COMPLETED", "addedRowsAtLeast": 1, "changedRowsAtLeast": 1, "removedRowsAtLeast": 1}
+    "description": "Version B exposes precise counts and field-level differences.",
+    "checks": [
+      "completed",
+      "counts",
+      "change-types",
+      "changed-fields",
+      "current-version"
+    ]
   },
   {
     "id": "same-payload-is-idempotent",
-    "description": "Re-running the same fictional source version does not duplicate a snapshot or change records.",
-    "requires": ["watchlist-run-api", "idempotency"],
-    "expected": {"duplicateSnapshot": false, "duplicateChangeRecords": false}
+    "description": "Repeating B reuses its snapshot and preserves changes and prior run aggregates.",
+    "checks": [
+      "same-snapshot",
+      "idempotent",
+      "changes-unchanged",
+      "prior-counts-immutable"
+    ]
   },
   {
     "id": "failed-source-run-preserves-current-view",
-    "description": "An invalid fictional payload produces a safe failed run and cannot change the current list.",
-    "requires": ["watchlist-run-api", "validation"],
-    "expected": {"status": "FAILED", "safeErrorCode": true, "currentViewUnchanged": true}
+    "description": "Missing source produces a safe failed run without modifying the current entities or changes.",
+    "checks": [
+      "failed",
+      "safe-code",
+      "entities-unchanged",
+      "changes-unchanged",
+      "failure-reviewable"
+    ]
   },
   {
     "id": "viewer-cannot-trigger-watchlist-run",
-    "description": "A viewer receives 403 when attempting to run a watchlist update but can read the current list.",
-    "requires": ["authentication", "authorization", "watchlist-run-api"],
-    "expected": {"mutationHttpStatus": 403, "readHttpStatus": 200}
+    "description": "A viewer can read but cannot mutate the source list.",
+    "checks": [
+      "write-denied",
+      "read-allowed",
+      "run-count-unchanged"
+    ]
+  },
+  {
+    "id": "watchlist-search-filters",
+    "description": "Search, provider/country/status filters and pagination operate on the latest snapshot.",
+    "checks": [
+      "normalized-search",
+      "country",
+      "provider",
+      "status",
+      "pagination",
+      "change-filter"
+    ]
+  },
+  {
+    "id": "transaction-import-and-monthly-summary",
+    "description": "Import mixed fictional rows, reject duplicates, and verify persisted search and monthly totals.",
+    "checks": [
+      "import-counts",
+      "duplicate-file",
+      "all-transactions",
+      "filtered-search",
+      "monthly-totals",
+      "viewer-denied"
+    ]
+  },
+  {
+    "id": "screening-review-authorization",
+    "description": "Operator and admin can record reviews; viewer/anonymous access and invalid bodies are rejected.",
+    "checks": [
+      "operator-allowed",
+      "admin-allowed",
+      "viewer-denied",
+      "anonymous-denied",
+      "null-disposition",
+      "invalid-score"
+    ]
+  },
+  {
+    "id": "invalid-request-contract",
+    "description": "Unknown JSON fields, invalid formats and invalid page parameters return safe errors.",
+    "checks": [
+      "unknown-field",
+      "invalid-format",
+      "invalid-page"
+    ]
   },
   {
     "id": "console-product-copy",
-    "description": "The console describes watchlist operations and workspace access while keeping the fictional-data indicator visible.",
-    "requires": ["web-console"],
-    "expected": {"portfolioPromotionVisible": false, "fictionalDataIndicatorVisible": true, "workspaceAccessLabel": "WORKSPACE ACCESS"}
+    "description": "Served HTML describes operations and workspace access, retaining the fictional-data indicator.",
+    "checks": [
+      "web-ready",
+      "workspace-access",
+      "fictional-data",
+      "product-copy"
+    ]
   }
 ]

@@ -27,7 +27,7 @@ Payload exceptions produce a failed run with a bounded code and no new snapshot.
 
 ## Access and review
 
-All authenticated roles can read current entities, changes and runs. ADMIN and OPERATOR can trigger updates. Screening records are separate human-entered dispositions. Their role restriction and transactional audit write are unfinished; see the [API contract](api-contract.md).
+All authenticated roles can read current entities, changes and runs. ADMIN and OPERATOR can trigger updates. Screening records are separate human-entered dispositions. ADMIN and OPERATOR can record them; reviews and audit events commit atomically through a service/repository. See the [API contract](api-contract.md).
 
 ## Known boundaries
 
