@@ -75,3 +75,6 @@ GET `/search-history?page=0&size=20`은 본인 기록의 query_json, total_resul
 
 
 법령 검색은 별도 RAG 서비스와 연동한다. 질문·인용·조문 이력/비교와 권한·데이터 보존은 [법령 검색 통합](law-integration.md)을 참고한다.
+
+
+운영 책임자 전용 법령 관리 API의 허용 조회·실행 목록, 검증, CSRF, 응답 필드와 감사 계약은 [법령 통합](law-integration.md#운영-책임자-관리-화면)을 따른다.

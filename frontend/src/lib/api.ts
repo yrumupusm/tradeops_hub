@@ -1,10 +1,17 @@
 let csrf: string | null = null;
 const messages: Record<string, string> = {
-  LAW_UNAVAILABLE: "법령 검색 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+  LAW_REINDEX_DISABLED: "법령 서버에서 재색인이 비활성화되어 있습니다.",
+  LAW_ADMIN_BUSY:
+    "다른 법령 관리 작업이 진행 중입니다. 완료 후 다시 시도해 주세요.",
+  LAW_UNAVAILABLE:
+    "법령 검색 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
   LAW_TIMEOUT: "법령 검색 응답 대기 시간이 지났습니다. 다시 검색해 주세요.",
-  LAW_INVALID_RESPONSE: "법령 검색 응답을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",
-  LAW_REQUEST_REJECTED: "법령 검색 서비스가 요청을 처리하지 못했습니다. 입력 내용을 확인해 주세요.",
-  LAW_ARTICLE_NOT_FOUND: "해당 조문을 찾을 수 없습니다. 법령을 다시 검색해 주세요.",
+  LAW_INVALID_RESPONSE:
+    "법령 검색 응답을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+  LAW_REQUEST_REJECTED:
+    "법령 검색 서비스가 요청을 처리하지 못했습니다. 입력 내용을 확인해 주세요.",
+  LAW_ARTICLE_NOT_FOUND:
+    "해당 조문을 찾을 수 없습니다. 법령을 다시 검색해 주세요.",
   AUTHENTICATION_FAILED: "아이디 또는 비밀번호를 확인해 주세요.",
   AUTHENTICATION_REQUIRED: "로그인이 필요합니다.",
   CSRF_INVALID: "접속 시간이 만료됐습니다. 다시 로그인해 주세요.",

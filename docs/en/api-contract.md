@@ -75,3 +75,6 @@ Validation policy bis-csv-2: only structural and required-name failures create r
 
 
 Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.
+
+
+Owner-only law administration: see [law integration](law-integration.md#owner-administration) for the explicit read/action allowlist, validation, CSRF, response projection and audit contract.

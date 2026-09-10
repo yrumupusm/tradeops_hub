@@ -2,6 +2,9 @@
 
 ## Law search integration — feat/law-search
 
+- [x] Connect owner-only law administration in Hub: status, corpus/detail/revisions, ingestion history, search logs and request traces, plus explicitly confirmed actions using RAG server settings. Fourteen focused tests and full local gate passed. API/web deployed on primary 8081/3000; actual read-only corpus/history/log/trace flows passed. Four action UI paths verified with intercepted responses only. Existing RAG process/data and separate repository preserved.
+- [ ] Apply final narrow-screen button wrapping build `.next-law-admin-reviewed`: production build and frontend gate passed; injected final CSS has no overflow at 390/768/1440. Automatic approval review rejected the last web restart (`blocked by policy`); current functional `.next-law-admin` remains running. User can run ignored `artifacts/start-law-admin-reviewed.ps1`. Final served CSS verification remains pending.
+
 - [x] Apply the verified law-search branch to primary Hub 3000/8081 using existing accounts/DB and original storage. Hub DB backed up; existing administrator login, sidebar navigation and an actual law answer with five citations passed. Accounts (3), BIS rows (8642), snapshots (2), law articles (4112) and vectors (4431) are unchanged; RAG process was not restarted. Repositories remain separate and main was not merged.
 
 - [x] Inspect RAG camelCase contracts and runtime without changing law data, vectors or source repository. RAG revision 9c2d67f; health DB ok, articles 4112, vectors 4431, index stale. Existing untracked output untouched.

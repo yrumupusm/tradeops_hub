@@ -36,7 +36,11 @@
     ".next-law-reviewed/types/**/*.ts",
     ".next-law-reviewed/dev/types/**/*.ts",
     ".next-law-primary/types/**/*.ts",
-    ".next-law-primary/dev/types/**/*.ts"
+    ".next-law-primary/dev/types/**/*.ts",
+    ".next-law-admin/types/**/*.ts",
+    ".next-law-admin/dev/types/**/*.ts",
+    ".next-law-admin-reviewed/types/**/*.ts",
+    ".next-law-admin-reviewed/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

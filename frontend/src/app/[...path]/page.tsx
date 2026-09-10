@@ -14,6 +14,7 @@ export default async function Page({
     "audit",
     "search-history",
     "law-search",
+    "law-admin",
     "watchlist/search",
     "watchlist/sources",
     "watchlist/runs",

@@ -4,7 +4,7 @@
 
 ## 책임 경계와 API
 
-Hub `/law-search`는 기존 한국어 공통 화면과 구성요소를 사용한다. 법령 RAG 저장소가 분석·검색·답변 생성·PostgreSQL·Qdrant를 담당한다. iframe, 화면 복사, 관리 프록시, 공유 DB나 두 검색 결과를 합친 수출 가능 판정은 만들지 않는다. 기존 RAG 화면은 개발 도구로 유지한다.
+Hub `/law-search`는 기존 한국어 공통 화면과 구성요소를 사용한다. 법령 RAG 저장소가 분석·검색·답변 생성·PostgreSQL·Qdrant를 담당한다. iframe, 화면 복사, 공유 DB나 두 검색 결과를 합친 수출 가능 판정은 만들지 않는다. 기존 RAG 화면은 개발 도구로 유지한다.
 
 모든 경로는 Hub 세션·활성 계정·비밀번호 변경 의무를 확인하며 POST에는 CSRF가 필요하다. 일반 로그인 사용자가 이용한다. 다음 고정 경로만 중계한다.
 
@@ -14,7 +14,7 @@ Hub `/law-search`는 기존 한국어 공통 화면과 구성요소를 사용한
 | GET /articles/{id}/history | GET /api/articles/{id}/history |
 | GET /articles/{id}/diff?compareWith={id} | GET /api/articles/{id}/diff?compareWith={id} |
 
-입력은 question(공백 불가, 최대 4000자), asOf(null 또는 유효한 YYYY-MM-DD), researchAreas(생략/null/빈 배열, STRATEGIC_GOODS, DEFENSE_MATERIALS 또는 중복 없는 두 분야)다. 미지원 필드와 양수가 아닌 조문 ID는 거부한다. 쿠키·CSRF·임의 브라우저 헤더를 전달하지 않는다. 관리·로그·수집·색인 API는 없다.
+입력은 question(공백 불가, 최대 4000자), asOf(null 또는 유효한 YYYY-MM-DD), researchAreas(생략/null/빈 배열, STRATEGIC_GOODS, DEFENSE_MATERIALS 또는 중복 없는 두 분야)다. 미지원 필드와 양수가 아닌 조문 ID는 거부한다. 쿠키·CSRF·임의 브라우저 헤더를 전달하지 않는다. 별도 운영 책임자 전용 관리 API는 아래에 정리한다.
 
 응답은 status, reasoning, followUpQuestions, citedArticles, disclaimer, effectiveBasis.asOf, RAG requestId와 Hub correlationId를 유지한다. nullable 조문 필드·본문·previousArticleId·historicalEntries를 보존한다. 질문 해석·점수·후보 법령·원본 errorMessage·서버 경로는 제외한다. 서버 감사에는 사용자·Hub 상관 ID·RAG 요청 ID·전체 effectiveBasis를 남기되 질문·답변·조문 전문은 넣지 않는다. 이를 통해 RAG SearchLog·AgentTrace와 연결하며 해당 로그는 개인 이력으로 공개하지 않는다. 질문은 URL이나 우려거래자 이력에 저장하지 않는다.
 
@@ -58,3 +58,15 @@ LawIntegrationTest는 입력·상태·인용·내부 필드 제외·추적 연�
 - 브라우저에서 실제 인용 펼치기, 이력 2개, 이전 조문 비교, 키보드 펼치기, 로딩·중복 전송 방지, 통제된 OK/LOW_CONFIDENCE/INSUFFICIENT_INFO/FAILED 상태와 연결 불가·시간 초과·잘못된 응답 안내를 확인했다. 오류 후 입력을 유지하며 화면 이동 시 늦은 결과를 버리고 우려거래자 화면으로 이동할 수 있다. HTML 형태의 본문은 텍스트로 표시되고 이전 ID가 없으면 비교를 비활성화한다.
 - 최종 제공 빌드를 1440·768·390 너비에서 확인했으며 가로 넘침이 없다. 로그인·로그아웃 후 접근 거부도 확인했다. 증거·화면 캡처는 Git에서 제외한 artifacts와 output/playwright에 보관한다.
 - 기존 RAG 품질 확인 사항: 방산 질문(RAG 요청 `17d23ff3-7736-4d41-a8aa-8e4491d49aaf`)의 인용 시행령 조문 이력에서 시작일 2026-07-01, 종료일 2026-06-30인 역전 구간이 표시됐다. Hub는 받은 날짜를 보존한다. 원본을 수정하거나 화면에서 날짜를 추정하지 않고 RAG에서 확인해야 한다. 기존 stale 색인 건수도 RAG 후속 사항으로 남긴다.
+
+## 운영 책임자 관리 화면
+
+`/law-admin`은 운영 책임자의 운영 관리 메뉴에 표시한다. `/api/v1/law-admin`의 모든 API는 서버에서도 운영 책임자 권한과 기존 계정·세션 제한을 확인한다.
+
+GET `/{section}`은 status, laws, ingestion-runs, search-logs, agent-traces만 허용한다. 법령 목록은 q(최대 200자), page(1~10000)를 받으며 페이지 크기는 20이다. 실행 추적은 빈 값 또는 표준 UUID requestId로 조회한다. GET `/laws/{id}`, `/laws/{id}/revisions`는 양수 ID를 사용한다. 수집 이력은 최근 20건, 검색 로그는 최근 50건, 실행 추적은 최대 100건이라는 원래 서비스 제한을 유지한다. 검색 로그에서 해당 요청의 실행 추적으로 이동할 수 있다. 질문 미리보기·해시, 추적 입력·출력, 원시 오류, 자료 경로와 저장소 주소는 응답에서 제외한다.
+
+POST `/actions/{action}`은 빈 JSON 객체만 받으며 CSRF 검증을 적용한다. 지원 작업은 sync-source(ingestAfterSync=true), ingest-local, reindex, provider-smoke-test다. RAG에 설정된 자료 주소·경로·브랜치를 사용하며 브라우저에서 경로나 주소를 지정할 수 없다. 재색인은 RAG의 활성화 설정도 확인한다. 화면에서 실행 전 확인을 거친다. 실행하면 법령 자료·벡터를 갱신하거나 유료 외부 서비스를 호출할 수 있지만, 페이지를 열거나 배포하는 것만으로 실행되지는 않는다. Hub 프로세스 하나에서 관리 요청은 한 번에 하나만 처리한다. 감사에는 사용자·작업·상관 ID와 시작·응답·실패를 기록하고 원시 응답은 기록하지 않는다. 응답을 받았다고 작업 성공을 의미하지는 않으며 결과 상태와 건수를 확인해야 한다.
+
+기존 클라이언트의 대기 한도를 적용하고 자동 재시도하지 않는다. 시간 초과나 화면 이동이 RAG 작업 취소를 보장하지 않으므로 수동 재실행 전에 상태와 수집 이력을 확인한다. 프로세스 간 영속 작업 큐는 아니다. 자료 설정은 RAG 환경에 미리 있어야 하며 누락 시 안전한 오류를 반환한다. RAG 코드·Git 이력·DB·임베딩은 Hub로 복사하지 않는다.
+
+관리 기능 검증: 집중 검사 14개와 전체 로컬 검사가 통과했고 기존 API·웹에 적용한 뒤 운영 책임자 계정으로 화면 이동을 확인했다. 실제 조회에서 법령 44개, 한 법령의 조문 424개, 수집 이력 6개와 선택한 요청의 처리 단계 4개를 확인했다. 실행 경로 4개는 브라우저에서 응답을 가로채 검증했으며 실제 변경 작업이나 외부 연결 점검 요청은 보내지 않았다. Hub 계정 3개, BIS 행 8642개, RAG 조문 4112개·벡터 4431개와 RAG 프로세스는 유지됐다. 마지막 390px 버튼 줄바꿈 수정은 프런트엔드 검사·운영 빌드 및 CSS를 주입한 390·768·1440 검사를 통과했지만 웹 재시작은 자동 승인 검토에서 차단됐다. 관리 기능은 현재 제공 중이며 최종 반응형 빌드의 수동 실행과 실제 제공 CSS 확인이 남아 있다.

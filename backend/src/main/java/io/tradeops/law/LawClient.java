@@ -53,6 +53,18 @@ public class LawClient {
     return call("/api/articles/" + id + "/diff?compareWith=" + previous, null);
   }
 
+  JsonNode administration(String path) {
+    return call(path, null);
+  }
+
+  JsonNode administrationAction(String action) {
+    return call(
+        "/api/admin/" + action,
+        action.equals("sync-source")
+            ? java.util.Map.of("ingestAfterSync", true)
+            : java.util.Map.of());
+  }
+
   private JsonNode call(String path, Object body) {
     if (base == null) throw new OperationException("LAW_UNAVAILABLE", 503);
     CompletableFuture<HttpResponse<byte[]>> pending = null;

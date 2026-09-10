@@ -1,5 +1,6 @@
 "use client";
 import LawSearch from "./law-search";
+import LawAdmin from "./law-admin";
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -65,6 +66,9 @@ const events: Record<string, string> = {
   SEARCH_HISTORY_DELETED: "검색 이력 삭제",
   SEARCH_EXECUTED: "우려거래자 검색",
   LAW_SEARCH_EXECUTED: "법령 검색",
+  LAW_ADMIN_STARTED: "법령 관리 작업 시작",
+  LAW_ADMIN_FINISHED: "법령 관리 작업 응답",
+  LAW_ADMIN_FAILED: "법령 관리 작업 응답 실패",
 };
 const labels: Record<string, string> = {
   Name: "이름",
@@ -538,6 +542,7 @@ export default function Console() {
     ...(user?.owner
       ? [
           ["운영 관리", ""],
+          ["법령 검색 관리", "/law-admin"],
           ["사용자 관리", "/users"],
           ["감사 이력", "/audit"],
         ]
@@ -672,6 +677,12 @@ export default function Console() {
             </div>
           )}
           {path === "/law-search" && <LawSearch onAuthError={fail} />}
+          {path === "/law-admin" &&
+            (user.owner ? (
+              <LawAdmin onAuthError={fail} />
+            ) : (
+              <p role="alert">운영 책임자만 접근할 수 있습니다.</p>
+            ))}
           {isSearch && (
             <>
               <form className="panel filters" onSubmit={submitSearch}>

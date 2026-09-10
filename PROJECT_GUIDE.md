@@ -36,4 +36,4 @@ Use [English design documents](docs/en/README.md) while implementing and verifyi
 
 ## Law search boundary
 
-The separate law RAG repository owns law data, embeddings and answer generation. Hub uses authenticated allowlisted HTTP calls for questions and article history/diff. See [integration](docs/en/law-integration.md). No ingestion, indexing or management proxy is part of Hub integration.
+The separate law RAG repository owns law data, embeddings and answer generation. Hub uses authenticated allowlisted HTTP calls for questions and article history/diff. See [integration](docs/en/law-integration.md). Owner-only administration uses an explicit endpoint allowlist. Data-changing actions run only after an explicit UI confirmation against RAG server configuration; connecting or deploying never ingests or reindexes.

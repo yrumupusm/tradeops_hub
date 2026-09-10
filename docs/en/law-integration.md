@@ -4,7 +4,7 @@
 
 ## Boundary and API
 
-Hub `/law-search` uses the existing Korean shell and native components. The law RAG repository owns analysis, retrieval, generation, PostgreSQL and Qdrant. No iframe, copied UI, admin proxy, shared DB or combined export-permission decision is introduced. The standalone RAG UI remains a development tool.
+Hub `/law-search` uses the existing Korean shell and native components. The law RAG repository owns analysis, retrieval, generation, PostgreSQL and Qdrant. No iframe, copied UI, shared DB or combined export-permission decision is introduced. The standalone RAG UI remains a development tool.
 
 All routes require existing Hub session/active-account/password-change checks; POST also requires CSRF. Ordinary authenticated users may use them. Only these fixed routes are forwarded:
 
@@ -14,7 +14,7 @@ All routes require existing Hub session/active-account/password-change checks; P
 | GET /articles/{id}/history | GET /api/articles/{id}/history |
 | GET /articles/{id}/diff?compareWith={id} | GET /api/articles/{id}/diff?compareWith={id} |
 
-Ask accepts question (nonblank, <=4000 characters), asOf (null or valid YYYY-MM-DD), researchAreas (absent/null/empty, STRATEGIC_GOODS, DEFENSE_MATERIALS, or both without duplicates). Unknown fields and nonpositive article IDs fail. No cookies, CSRF tokens or arbitrary browser headers are forwarded. Management/log/ingestion/index routes are unavailable.
+Ask accepts question (nonblank, <=4000 characters), asOf (null or valid YYYY-MM-DD), researchAreas (absent/null/empty, STRATEGIC_GOODS, DEFENSE_MATERIALS, or both without duplicates). Unknown fields and nonpositive article IDs fail. No cookies, CSRF tokens or arbitrary browser headers are forwarded. The separate owner-only administration API is described below.
 
 Responses retain status, reasoning, followUpQuestions, citedArticles, disclaimer, effectiveBasis.asOf, RAG requestId and Hub correlationId. Nullable article fields, content, previousArticleId and historicalEntries are preserved. Interpretation, scores, candidate laws, raw errorMessage and source paths are omitted. Server audit records actor, Hub correlation, RAG requestId and full effectiveBasis, without question/answer/article text. This maps to RAG SearchLog/AgentTrace; those logs are not personal history. Questions are never stored in URLs or watchlist history.
 
@@ -58,3 +58,15 @@ LawIntegrationTest covers input, states, citations, projection, trace correlatio
 - Browser checks passed for real citation expansion, two history entries, prior comparison, keyboard expansion, loading/duplicate-submit protection, controlled OK/LOW_CONFIDENCE/INSUFFICIENT_INFO/FAILED states and unavailable/timeout/invalid-response notices. Inputs survive failures; navigation discards delayed replies and watchlist navigation remains usable. HTML-looking article text remains text; absent prior IDs disable comparison.
 - Final served build was inspected at widths 1440, 768 and 390 without horizontal overflow. Login and logout/session denial were checked. Evidence and screenshots remain ignored under artifacts and output/playwright.
 - Existing RAG quality follow-up: the defense question (RAG request `17d23ff3-7736-4d41-a8aa-8e4491d49aaf`) exposed a historical interval starting 2026-07-01 and ending 2026-06-30 for the cited enforcement-decree article. Hub preserves the supplied dates; investigate in RAG rather than editing source data or inventing a correction in UI. Existing stale vector count also remains a RAG follow-up.
+
+## Owner administration
+
+`/law-admin` appears under 운영 관리 for the fixed owner. Every `/api/v1/law-admin` endpoint also enforces backend owner authorization and the existing account/session restrictions.
+
+GET `/{section}` allows only status, laws, ingestion-runs, search-logs and agent-traces. Laws accept q (<=200 characters) and page (1..10000), size is fixed at 20. Traces accept an empty or canonical UUID requestId. GET `/laws/{id}` and `/laws/{id}/revisions` require positive IDs. Lists preserve upstream limits: 20 ingestion runs, 50 search logs, 100 traces. Logs link to filtered traces. Response projection excludes question previews/hashes, trace input/output, raw errors, source paths and repository URLs.
+
+POST `/actions/{action}` accepts only an empty JSON object and requires CSRF. Actions are sync-source (with ingestAfterSync=true), ingest-local, reindex and provider-smoke-test. RAG's configured source URL/directory/branch are used; the browser cannot supply paths or URLs. Reindex also checks RAG's enabled flag. The UI asks for confirmation before execution. These operations may update law data/vectors or invoke billed providers; no operation is performed automatically by mounting the page or deploying. A single Hub process permits one concurrent administration call. Hub audit records actor, action, correlation and start/return/failure, without raw upstream content. A returned response is not necessarily operation success: inspect reported status/counts.
+
+The existing bounded client does not retry. A timeout or browser navigation does not promise upstream cancellation; inspect status and run history before manually retrying. This is not a durable cross-process job queue. Source settings must already exist in the RAG environment; missing settings produce a safe failure. No RAG code, Git history, DB or embedding data is copied into Hub.
+
+Administration verification: 14 focused cases and full local gate passed; primary API/web deployment and existing-owner browser navigation succeeded. Real reads showed 44 laws, a 424-article law detail, 6 ingestion runs and four stages for a selected request. Four action paths were intercepted in the browser; no actual mutation/provider test was sent. Hub accounts (3), BIS rows (8642), RAG articles (4112), vectors (4431) and RAG PID were unchanged. The last 390px button-wrap correction passed the frontend gate, production build and injected-CSS 390/768/1440 checks; automatic review blocked its web restart. The functional admin build is live; the final responsive build awaits manual startup and served-CSS verification.
