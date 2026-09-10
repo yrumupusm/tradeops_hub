@@ -1,22 +1,8 @@
-# 검색 분야 선택
+# 문서 이동 / Document moved
 
-질문 화면에서는 사용자가 먼저 확인할 분야를 복수로 선택할 수 있다.
+이 문서의 본문은 한·영 문서로 분리했습니다. 아래 경로에서 최신 내용을 확인하세요.
 
-- `STRATEGIC_GOODS`: 전략물자 관련 법령을 우선 검색한다.
-- `DEFENSE_MATERIALS`: 방산물자·국방과학기술 관련 법령을 우선 검색한다.
-- 선택하지 않음: 기존처럼 질문 내용으로 관련 법령을 함께 검색한다.
+This document is now maintained as a Korean/English pair. Use the links below for the current content.
 
-이 선택값은 물품·기술의 법적 분류나 허가 여부를 판정하는 값이 아니다. 선택된 분야의 검색어와 관련 법령을 우선순위에 반영할 뿐이며, 다른 분야의 근거 조문을 검색 결과에서 제외하지 않는다. 따라서 두 규제가 함께 적용될 수 있는 질문에서도 근거를 놓치지 않는다.
-
-`POST /api/ask`와 `POST /api/v1/ask`는 선택값을 선택적 `researchAreas` 배열로 받는다. snake_case 호환 요청에서는 `research_areas`도 허용한다.
-
-```json
-{
-  "question": "탱크를 수출하려고 하는데 관련 법령을 알려줘",
-  "researchAreas": ["DEFENSE_MATERIALS"]
-}
-```
-
-방산물자·국방과학기술을 선택한 경우 답변 하단에는 방위사업청의 수출허가 또는 예비승인 기준을 확인하도록 안내한다. 전략물자를 선택한 경우에는 무역안보관리원이 안내하는 전략물자 판정 및 수출허가 기준을 확인하도록 안내한다.
-
-질문이 `관련 법령이 뭐 있어?`처럼 법령 목록을 요청하는 형태이면, 선택된 분야의 법령명을 검색어에 추가하고 서로 다른 법령이 우선 포함되도록 결과를 구성한다. 답변 첫머리의 `검색된 관련 법령` 목록에는 실제로 인용된 조문이 있는 법령만 표시한다. 검색 근거가 없는 법령명은 추가하지 않는다.
+- [한국어](ko/research-area-selection.md)
+- [English](en/research-area-selection.md)

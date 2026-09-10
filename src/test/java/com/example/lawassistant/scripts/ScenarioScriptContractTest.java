@@ -125,8 +125,8 @@ class ScenarioScriptContractTest {
         assertThat(script).contains("RERANKER_API_KEY");
         assertThat(script).contains("QDRANT_BASE_URL");
         assertThat(script).contains("readiness-summary.json");
-        assertThat(script).contains("docs\\original-parity.md");
-        assertThat(script).contains("docs\\runtime-readiness.md");
+        assertThat(script).contains("docs\\en\\original-parity.md");
+        assertThat(script).contains("docs\\en\\runtime-readiness.md");
         assertThat(script).contains("scripts\\verify-completion-evidence.ps1");
         assertThat(script).contains("scripts\\verify-final.ps1");
         assertThat(script).contains("verify-final.ps1");

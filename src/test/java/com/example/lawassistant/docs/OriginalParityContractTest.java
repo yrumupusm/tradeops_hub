@@ -12,7 +12,7 @@ class OriginalParityContractTest {
 
     @Test
     void originalParityDocumentMapsP0ScopeToSpringArtifacts() throws IOException {
-        String parity = read("docs/original-parity.md");
+        String parity = read("docs/en/original-parity.md");
 
         assertThat(parity).contains("portfolio-scale reimplementation");
         assertThat(parity).contains("Original `CLAUDE.md`");
@@ -33,7 +33,7 @@ class OriginalParityContractTest {
 
     @Test
     void originalParityDocumentPreservesResponseAndProviderContracts() throws IOException {
-        String parity = read("docs/original-parity.md");
+        String parity = read("docs/en/original-parity.md");
 
         assertThat(parity).contains("status=OK requires citations");
         assertThat(parity).contains("No legal final determination");
@@ -57,7 +57,7 @@ class OriginalParityContractTest {
 
     @Test
     void originalParityDocumentIncludesRuntimeProofGate() throws IOException {
-        String parity = read("docs/original-parity.md");
+        String parity = read("docs/en/original-parity.md");
 
         assertThat(parity).contains("scripts/verify-local.ps1");
         assertThat(parity).contains("scripts/verify-readiness.ps1");
@@ -71,7 +71,7 @@ class OriginalParityContractTest {
 
     @Test
     void originalParityDocumentDoesNotClaimLineByLinePortOrUseSensitiveData() throws IOException {
-        String parity = read("docs/original-parity.md");
+        String parity = read("docs/en/original-parity.md");
 
         assertThat(parity).contains("No company-confidential code");
         assertThat(parity).doesNotContain("is a line-by-line port");

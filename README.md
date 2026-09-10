@@ -11,7 +11,7 @@
 
 검색 대상은 무역안보 관련 8개 핵심 법령과 수집된 하위 법령입니다. 대한민국 전체 법령을 실시간으로 조회하는 서비스가 아니며, 답변은 최종 법률 판단을 대신하지 않습니다.
 
-[TradeOps Hub](https://github.com/yrumupusm/tradeops_hub)와는 저장소를 분리해 연동합니다. Hub는 사용자 화면과 인증을, 이 프로젝트는 법령 데이터와 검색·답변을 담당합니다. 연결 계약과 작업 범위는 [연동 인계 문서](docs/tradeops-integration-handoff.md)에 정리했습니다.
+[TradeOps Hub](https://github.com/yrumupusm/tradeops_hub)와는 저장소를 분리해 연동합니다. Hub는 사용자 화면과 인증을, 이 프로젝트는 법령 데이터와 검색·답변을 담당합니다. 연결 계약과 작업 범위는 [연동 인계 문서](docs/ko/tradeops-integration-handoff.md)에 정리했습니다.
 
 ## 실행
 
@@ -21,13 +21,13 @@ Java 17과 Maven이 필요합니다. PostgreSQL·Qdrant 실행에는 Docker, 로
 2. PostgreSQL·Qdrant를 사용한다면 `powershell -File scripts/infra.ps1 up`으로 실행합니다. `.env`의 DB 연결과 `VECTOR_PROVIDER=qdrant` 설정을 맞춥니다.
 3. `powershell -File scripts/preflight.ps1`로 설정을 점검합니다.
 4. `powershell -File scripts/server.ps1 start`로 서버를 실행합니다. Maven이 PATH에 없다면 `-MavenPath <mvn.cmd 경로>`를 추가합니다.
-5. 기본 주소 `http://localhost:8080`에 접속합니다. 첫 데이터 수집이 필요한 환경은 [운영 안내](docs/runbook.md)를 따릅니다.
+5. 기본 주소 `http://localhost:8080`에 접속합니다. 첫 데이터 수집이 필요한 환경은 [운영 안내](docs/ko/runbook.md)를 따릅니다.
 
 서버 상태 확인과 중지는 `scripts/server.ps1 status`, `scripts/server.ps1 stop`을 사용합니다. 기존 DB·벡터 데이터가 있다면 재시작만을 위해 재수집하거나 재임베딩할 필요가 없습니다. 설정 예시의 mock 모드는 실제 모델을 호출하지 않으므로 실제 검색 환경과 구분해야 합니다.
 
 ## 검증
 
-서버 없이 설정·스크립트·JavaScript 문법·Maven 테스트를 확인하려면 다음 명령을 사용합니다.
+서버 없이 설정·스크립트·JavaScript 문법·Maven 테스트를 확인하려면 다음 명령을 사용합니다. 단, 실제 DB가 설정된 환경에서는 [운영 안내의 테스트 격리 절차](docs/ko/runbook.md)를 먼저 따릅니다. 현재 기본 테스트 명령은 로컬 DB와의 자동 격리를 보장하지 않습니다.
 
 ```powershell
 powershell -File scripts/verify-local.ps1 -MavenPath <mvn.cmd 경로>
@@ -41,7 +41,7 @@ powershell -File scripts/verify-readiness.ps1 -RequireExternalProviders
 powershell -File scripts/verify-final.ps1
 ```
 
-검증 스크립트는 서버를 시작, 중지, 재시작하지 않습니다. 최종 검증은 설정된 외부 모델을 호출하므로 비용과 대기 시간이 발생할 수 있습니다. Qdrant·Cohere를 필수로 검증하려면 `-RequireQdrant`, `-RequireCohere`를 사용합니다. 결과는 `target/evidence-report.md`와 관련 JSON 파일에 기록됩니다. 세부 기준은 [검증 안내](docs/evaluation-harness.md)와 [실행 준비 점검](docs/runtime-readiness.md)을 참고하세요.
+검증 스크립트는 서버를 시작, 중지, 재시작하지 않습니다. 최종 검증은 설정된 외부 모델을 호출하므로 비용과 대기 시간이 발생할 수 있습니다. Qdrant·Cohere를 필수로 검증하려면 `-RequireQdrant`, `-RequireCohere`를 사용합니다. 결과는 `target/evidence-report.md`와 관련 JSON 파일에 기록됩니다. 세부 기준은 [검증 안내](docs/ko/evaluation-harness.md)와 [실행 준비 점검](docs/ko/runtime-readiness.md)을 참고하세요.
 
 ## 아키텍처
 
@@ -66,20 +66,22 @@ flowchart LR
 
 ## 설계 문서
 
+[전체 한·영 문서 목록](docs/README.md) · [한국어 문서](docs/ko/README.md) · [English documentation](docs/en/README.md)
+
 | 문서 | 내용 |
 | --- | --- |
-| [C4 모델](docs/architecture/c4.md) | 시스템 경계와 구성요소 |
-| [ADR](docs/adr/README.md) | 주요 설계 결정과 이유 |
-| [arc42](docs/arc42-lite.md) | 요구사항, 품질 목표와 제약 |
-| [제품 명세](docs/product-spec.md) | 기능과 제품 범위 |
-| [API 계약](docs/api-contract.md) | 요청·응답과 검증 규칙 |
-| [질문 처리 구조](docs/agent-orchestration.md) | 분석·검색·답변·검증 단계 |
-| [상세 아키텍처](docs/architecture.md) | 검색, 수집, 데이터와 로그 설계 |
-| [분야 선택](docs/research-area-selection.md) | 전략물자·방산 분야 선택의 동작 |
-| [운영 안내](docs/runbook.md) | 환경 설정, 실행, 수집과 장애 점검 |
-| [검증 안내](docs/evaluation-harness.md) | 고정 질문과 회귀 검증 기준 |
-| [TradeOps Hub 연동](docs/tradeops-integration-handoff.md) | 화면·인증 연결과 데이터 보존 |
-| [문서 언어 기준](docs/documentation-language.md) | TradeOps의 한·영 문서 관리 규칙과 적용 범위 |
+| [C4 모델](docs/ko/architecture/c4.md) | 시스템 경계와 구성요소 |
+| [ADR](docs/ko/adr/README.md) | 주요 설계 결정과 이유 |
+| [arc42](docs/ko/arc42-lite.md) | 요구사항, 품질 목표와 제약 |
+| [제품 명세](docs/ko/product-spec.md) | 기능과 제품 범위 |
+| [API 계약](docs/ko/api-contract.md) | 요청·응답과 검증 규칙 |
+| [질문 처리 구조](docs/ko/agent-orchestration.md) | 분석·검색·답변·검증 단계 |
+| [상세 아키텍처](docs/ko/architecture.md) | 검색, 수집, 데이터와 로그 설계 |
+| [분야 선택](docs/ko/research-area-selection.md) | 전략물자·방산 분야 선택의 동작 |
+| [운영 안내](docs/ko/runbook.md) | 환경 설정, 실행, 수집과 장애 점검 |
+| [검증 안내](docs/ko/evaluation-harness.md) | 고정 질문과 회귀 검증 기준 |
+| [TradeOps Hub 연동](docs/ko/tradeops-integration-handoff.md) | 화면·인증 연결과 데이터 보존 |
+| [문서 언어 기준](docs/ko/documentation-language.md) | 한·영 문서 대응과 한국어 화면 관리 규칙 |
 
 개발자용 API 테스트는 `http://localhost:8080/swagger-ui/index.html`, 운영 상태는 `GET /api/admin/status`에서 확인할 수 있습니다. 상단 메뉴에서는 질문·관리만 제공합니다.
 

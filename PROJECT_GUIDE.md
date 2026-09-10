@@ -1,44 +1,54 @@
 # Project Guide
 
-## 핵심 원칙
+## Documentation Entry Points
 
-- LLM은 법령을 직접 생성하지 않는다.
-- `status=OK` 답변은 최소 1개 이상의 `citedArticle`을 포함해야 한다.
-- 검색 또는 hydrate된 조문이 있는 `LOW_CONFIDENCE` 답변도 최소 1개 이상의 `citedArticle`을 포함해야 한다.
-- 근거가 부족하면 결론을 내리지 않고 `INSUFFICIENT_INFO`와 follow-up question을 반환한다.
-- 모든 답변은 `snapshotVersion`, `indexedAt`, `sourcePath`를 포함한다.
-- 실패 응답은 provider 예외 원문 대신 `errorMessage`에 안전한 단계별 또는 품질 게이트별 실패 코드만 포함한다.
-- Ask 요청은 `question`, `asOf` 외 알 수 없는 JSON 필드를 거부하고, 빈 질문/4000자 초과/잘못된 날짜를 400으로 처리한다.
-- 실제 회사 데이터, 내부 URL, 계정 정보, API key는 사용하지 않는다.
+- [Korean public documentation](docs/ko/README.md)
+- [English implementation and verification references](docs/en/README.md)
+- [Bilingual correspondence index](docs/README.md)
+- [Documentation language and Korean UX policy](docs/en/documentation-language.md)
 
-## 작업 규칙
+Read the English references for implementation; keep public README navigation in Korean. Both language versions describe the same design and must be updated in the same commit. Preserve constraints, examples, implementation status, and historical ADR context. Resolve discrepancies against code, tests, and the user's latest authorized requirements, not language preference.
 
-- Controller는 HTTP request/response만 담당한다.
-- Service는 질문 분석, 검색, 답변 합성, 검증, 로그 저장 책임을 분리한다.
-- LLM, embedding, vector search는 interface 뒤에 둔다.
-- RetrievalAgent는 keyword/vector 후보 병합 후 reranker를 적용한다.
-- provider URL, model name, API key는 환경 변수로 관리한다.
-- 법령 원문은 Git 동기화 후 Markdown 수집 흐름으로 관리한다.
-- 테스트는 status, citation, retrieval diagnostics를 함께 검증한다.
+## Core Principles
 
-## 금지 사항
+- The LLM does not invent laws.
+- A `status=OK` answer must include at least one `citedArticles` item.
+- A `LOW_CONFIDENCE` answer with retrieved or hydrated articles must also include at least one `citedArticles` item.
+- When evidence is insufficient, do not draw a conclusion; return `INSUFFICIENT_INFO` and follow-up questions.
+- Every answer includes `snapshotVersion`, `indexedAt`, and `sourcePath` in its basis data.
+- Failure responses expose only safe stage-specific or quality-gate-specific codes in `errorMessage`, not raw provider exceptions.
+- Ask requests accept `question`, `asOf`, and optional `researchAreas`; aliases `as_of` and `research_areas` are supported. Reject unknown fields, blank or over-4000-character questions, invalid dates, and invalid area values with 400.
+- Do not use real company data, internal URLs, account information, or real API keys in code or documentation.
 
-- `citedArticles`가 비어 있는데 `status=OK` 반환
-- context에 없는 법령명이나 조문 생성
-- 질문 원문이나 민감정보를 로그에 그대로 저장
-- API key 하드코딩
-- 현재 법령 조사 범위를 벗어나는 과도한 기능 확장
-- Git 동기화 과정에서 로컬 변경을 강제로 덮어쓰기
+## Working Rules
 
-## 현재 설계상 의도
+- Controllers handle only HTTP requests and responses.
+- Services separate question analysis, retrieval, answer synthesis, validation, and log storage.
+- Keep LLM, embedding, and vector search behind interfaces.
+- RetrievalAgent applies reranking after merging keyword/vector candidates.
+- Manage provider URLs, model names, and API keys through environment variables.
+- Manage legal sources through Git synchronization followed by Markdown ingestion.
+- Tests verify status, citations, and retrieval diagnostics together.
+- Some integration tests can inherit a real datasource from local `.env`. Before running the full suite, explicitly select temporary H2 and mock providers as documented in `docs/en/runbook.md`. Do not run bare `mvn test` or `verify-local.ps1` against a real-data configuration; automatic default isolation remains follow-up work.
 
-- LLM provider: OpenRouter 또는 mock
-- Embedding provider: OpenRouter 또는 mock
-- Vector provider: in-memory
-- Reranker provider: Cohere 또는 mock
-- DB: H2 in-memory
+## Prohibited Actions
 
-이 구성은 제한된 법령 범위에서 Spring Boot 기반 AX/RAG 조사 흐름을 구현하기 위한 구성이다.
+- Returning `status=OK` with empty `citedArticles`
+- Inventing law names or articles absent from the context
+- Storing full questions or sensitive information verbatim in operational logs
+- Hardcoding API keys
+- Expanding excessively beyond the current legal research scope
+- Forcibly overwriting local changes during Git synchronization
+
+## Current Design Intent
+
+- LLM provider: OpenRouter or mock
+- Embedding provider: OpenRouter or mock
+- Vector provider: in-memory by default; configurable Qdrant
+- Reranker provider: Cohere or mock
+- Database: H2 in-memory by default; configurable persistent PostgreSQL
+
+This configuration implements a Spring Boot AX/RAG research workflow within a limited legal scope. Development defaults are distinct from a persistent runtime; preserve existing database and vector data. See the [runbook](docs/en/runbook.md) for configuration and operations.
 
 ## Runtime Audit And Scenario Rules
 

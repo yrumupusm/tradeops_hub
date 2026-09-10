@@ -17,6 +17,17 @@ AskController
 -> SearchLogAgent
 ```
 
+## Documentation Languages And Korean UX
+
+- Keep public `README.md` navigation in Korean and link to `docs/ko/` by default. Use `docs/en/` for implementation and verification references.
+- Maintain the same relative filenames in `docs/ko/<path>` and `docs/en/<path>` and the correspondence index in `docs/README.md`.
+- Both versions describe one design at the same revision. Update both in the same commit when design, APIs, workflows, invariants, or operations change. Pair added and removed pages.
+- Preserve constraints, examples, completion status, and historical ADR context. Resolve differences against code, tests, and the user's latest authorized requirements; English is not an override of user intent.
+- Keep `AGENTS.md` and `PROJECT_GUIDE.md` as English working instructions. Preserve existing local handoff history separately from public design documents.
+- Use natural Korean for user-facing navigation, forms, errors, notices, and CSV headings. Format dates/numbers for Korean readers and make the time zone explicit.
+- Preserve legal source titles, article numbers, raw records, code identifiers, API paths, configuration names, and standards such as C4/ADR. English docs may quote exact Korean UI labels and evaluation questions.
+- Follow `docs/en/documentation-language.md`; old root document paths contain migration notices, not a second maintained design.
+
 ## Must Follow
 
 - Read `PROJECT_GUIDE.md` before making behavior changes.
@@ -72,5 +83,6 @@ AskController
 - Fixed question regression: `EvaluationHarnessTest`
 - Runtime scenario contract: `ScenarioScriptContractTest`, `scripts/run-scenarios.ps1`
 - Provider abstraction: `ProviderInterfaceTest`
-- Original project parity: `OriginalParityContractTest`, `docs/original-parity.md`
+- Documentation pairing and links: `DocumentationLanguageContractTest`
+- Original project parity: `OriginalParityContractTest`, `docs/en/original-parity.md`
 - Full regression: `mvn test`
