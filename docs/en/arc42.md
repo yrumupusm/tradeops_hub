@@ -60,3 +60,6 @@ BIS may change page structure, file schema or availability. Such changes are sur
 ## 12. Glossary
 
 DPL: Denied Persons List. EL: Entity List. Snapshot: immutable imported source version. Held: validated snapshot awaiting approval before publication. Similar candidate: name similarity result, not entity identity or legal determination.
+
+
+Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.

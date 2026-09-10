@@ -17,3 +17,6 @@
 - [ADR 0003](adr/0003-local-source-boundary.md)
 - [ADR 0004](adr/0004-authorization-and-traceability.md)
 - [ADR 0005](adr/0005-bis-sessions-and-provenance.md)
+
+
+법령 검색은 별도 RAG 서비스와 연동한다. 질문·인용·조문 이력/비교와 권한·데이터 보존은 [법령 검색 통합](law-integration.md)을 참고한다.

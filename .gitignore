@@ -9,6 +9,8 @@ backend/build/
 backend/target/
 frontend/.next/
 frontend/.next-verify/
+frontend/.next-law-verify/
+output/playwright/
 frontend/node_modules/
 *.tsbuildinfo
 

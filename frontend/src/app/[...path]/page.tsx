@@ -13,6 +13,7 @@ export default async function Page({
     "users",
     "audit",
     "search-history",
+    "law-search",
     "watchlist/search",
     "watchlist/sources",
     "watchlist/runs",

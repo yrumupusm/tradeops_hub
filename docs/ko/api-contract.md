@@ -72,3 +72,6 @@ GET `/search-history?page=0&size=20`은 본인 기록의 query_json, total_resul
 거래·가져오기·심사·역할 관리 API는 없고 과거 테이블은 유지한다. GET `/health`는 공개이며 status/service/checkedAt/correlationId를 포함한다. GET `/actuator/health`는 민감한 세부 정보를 공개하지 않는다.
 
 검증 정책 bis-csv-2는 구조·필수 이름 실패만 행 문제로 만든다. 선택적 국가·날짜 변환은 경고를 만들지 않으며 원문을 보존한다. 과거 완료 집계는 바꾸지 않는다. 스냅샷 재사용은 파일 해시와 파서 버전 모두 같아야 하므로 파서 갱신 후 다음 수집은 동일 바이트도 다시 처리한다.
+
+
+법령 검색은 별도 RAG 서비스와 연동한다. 질문·인용·조문 이력/비교와 권한·데이터 보존은 [법령 검색 통합](law-integration.md)을 참고한다.

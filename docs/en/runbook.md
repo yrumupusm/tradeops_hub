@@ -44,3 +44,6 @@ The owner creates accounts with temporary passwords; users change them after fir
 Back up DB and originals together. Test restores using a separate database/directory. There is no automatic original-file deletion. Never commit `storage/`, `artifacts/`, `.env` or builds, and never use public BIS records as repository fixtures.
 
 Distinguish server-free, PostgreSQL and runtime/browser checks in the [verification guide](evaluation-harness.md). Evidence contains only status, counts and safe codes, never original names or session information.
+
+
+Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.

@@ -17,3 +17,6 @@ English implementation reference. Keep it synchronized with the Korean public do
 - [ADR 0003](adr/0003-local-source-boundary.md)
 - [ADR 0004](adr/0004-authorization-and-traceability.md)
 - [ADR 0005](adr/0005-bis-sessions-and-provenance.md)
+
+
+Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.

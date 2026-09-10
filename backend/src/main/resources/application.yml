@@ -34,6 +34,9 @@ management:
     health:
       show-details: never
 tradeops:
+  law:
+    base-url: ${LAW_RAG_BASE_URL:}
+    timeout-seconds: ${LAW_RAG_TIMEOUT_SECONDS:180}
   owner:
     username: ${OWNER_USERNAME:admin@tradeops.test}
     password: ${OWNER_INITIAL_PASSWORD:}

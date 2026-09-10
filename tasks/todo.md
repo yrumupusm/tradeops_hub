@@ -1,5 +1,15 @@
 # Delivery checklist — BIS workspace
 
+## Law search integration — feat/law-search
+
+- [x] Inspect RAG camelCase contracts and runtime without changing law data, vectors or source repository. RAG revision 9c2d67f; health DB ok, articles 4112, vectors 4431, index stale. Existing untracked output untouched.
+- [x] Implement authenticated allowlisted Hub endpoints, bounded timeouts, response invariants, safe errors and Hub/RAG audit correlation.
+- [x] Add Korean Hub-native question, answer, expandable citations, history and comparison UI with cancellation and duplicate-submit protection.
+- [ ] Test validation, authentication/CSRF/disabled/forced-change accounts, upstream states/errors and citation/history preservation; run local and browser/runtime checks.
+- [ ] Update paired design/deployment docs with runtime configuration, data-preservation boundaries and tested repository revisions; commit on feature branch.
+
+LawIntegrationTest (13 cases), LawClientTest (2 cases), full server-free local gate and API/web production builds passed. Actual Hub/RAG and browser acceptance remain pending: automatic approval review rejected the preview API launch without a specific reason. User's first manual preview launch overlapped a final rebuild and failed; an immutable replacement artifact and corrected ignored preview script are ready. Await manual rerun before claiming runtime acceptance. Primary Hub and RAG services/data remain untouched. Paired integration/contract/scope/C4/arc42/runbook documents have been updated; final verified revision record awaits runtime checks.
+
 ## Implemented
 
 - [x] Replace JWT/role APIs with JDBC sessions, CSRF, fixed-owner account management, password changes and revocation.

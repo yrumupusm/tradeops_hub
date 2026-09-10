@@ -713,3 +713,149 @@ summary {
     transition: none !important;
   }
 }
+
+.law-search {
+  display: grid;
+  gap: 20px;
+}
+.law-search textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 112px;
+  margin-top: 8px;
+}
+.law-count {
+  text-align: right;
+  color: #667085;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.law-options {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.law-options fieldset {
+  flex: 1;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 220px;
+}
+.law-options legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.law-area-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.law-area-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.law-area-options input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.law-options small {
+  display: block;
+  margin-top: 6px;
+  color: #667085;
+}
+.law-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 16px;
+}
+.law-actions > span {
+  font-size: 13px;
+  color: #667085;
+}
+.law-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.85;
+}
+.law-submitted {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.law-answer h3 {
+  margin: 24px 0 12px;
+}
+.law-citation {
+  border: 1px solid var(--border, #dce5f0);
+  border-radius: 8px;
+  margin: 12px 0;
+}
+.law-citation > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  cursor: pointer;
+}
+.law-article-title {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.law-expand {
+  color: #1967ad;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.law-close-label,
+.law-citation[open] > summary .law-open-label {
+  display: none;
+}
+.law-citation[open] > summary .law-close-label {
+  display: inline;
+}
+.law-citation-body {
+  border-top: 1px solid #dce5f0;
+  padding: 18px;
+}
+.law-article-content {
+  max-height: 480px;
+  overflow: auto;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+}
+.law-history details {
+  padding: 10px 0;
+}
+.law-history summary {
+  cursor: pointer;
+  padding: 8px 0;
+}
+.law-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.law-disclaimer {
+  border-top: 1px solid #dce5f0;
+  padding-top: 18px;
+  color: #667085;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+@media (max-width: 900px) {
+  .law-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+  .law-options > label {
+    width: 100%;
+  }
+}

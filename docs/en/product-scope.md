@@ -43,3 +43,6 @@ Recent searches show at most five distinct nonempty terms in muted gray text bel
 ## Exclusions
 
 Transaction upload/aggregation, counterparty screening/decisions, role management, other institutions' lists and automatic legal decisions are excluded. Preserve existing DB/migrations but remove those public APIs. Multiple API instances, external alerts and automatic original deletion remain outside current scope.
+
+
+Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.

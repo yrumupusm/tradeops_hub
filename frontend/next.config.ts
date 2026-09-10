@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
+  experimental: { proxyTimeout: 195000 },
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   async rewrites() {
     return [

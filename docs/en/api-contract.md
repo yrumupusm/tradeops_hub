@@ -72,3 +72,6 @@ GET `/search-history?page=0&size=20` returns the actor's entries including query
 Transaction/import/screening and role-management endpoints are absent. Historical tables are preserved. GET `/health` is public and contains status/service/checkedAt/correlationId. GET `/actuator/health` exposes no sensitive details.
 
 Validation policy bis-csv-2: only structural and required-name failures create row issues. Optional country/date conversions never create warnings; raw values are preserved. Prior completed counts remain unchanged. Snapshot reuse requires matching parser version as well as file hash, so the next collection after a parser upgrade reprocesses unchanged bytes.
+
+
+Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.

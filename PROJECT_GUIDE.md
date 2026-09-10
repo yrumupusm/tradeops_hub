@@ -33,3 +33,7 @@ Read this file and [tasks](tasks/todo.md) before behavioral edits. Update the ch
 ## Documentation entry points
 
 Use [English design documents](docs/en/README.md) while implementing and verifying. [Korean documents](docs/ko/README.md) are the public default. [The correspondence index](docs/README.md) maps each pair. Update both versions in the same commit and follow the language/UX rules in AGENTS.md. Korean users determine product language and interaction conventions; English implementation notes do not imply English UI.
+
+## Law search boundary
+
+The separate law RAG repository owns law data, embeddings and answer generation. Hub uses authenticated allowlisted HTTP calls for questions and article history/diff. See [integration](docs/en/law-integration.md). No ingestion, indexing or management proxy is part of Hub integration.

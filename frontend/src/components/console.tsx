@@ -1,4 +1,5 @@
 "use client";
+import LawSearch from "./law-search";
 import { FormEvent, ReactNode, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -63,6 +64,7 @@ const events: Record<string, string> = {
   EXPORT_GENERATED: "CSV 생성",
   SEARCH_HISTORY_DELETED: "검색 이력 삭제",
   SEARCH_EXECUTED: "우려거래자 검색",
+  LAW_SEARCH_EXECUTED: "법령 검색",
 };
 const labels: Record<string, string> = {
   Name: "이름",
@@ -528,6 +530,8 @@ export default function Console() {
     ["우려거래자 검색", "/watchlist/search"],
     ["우려거래자 수집 관리", "/watchlist/sources"],
     ["수집 이력", "/watchlist/runs"],
+    ["법령 조사", ""],
+    ["법령 검색", "/law-search"],
     ["내 작업", ""],
     ["내 검색 이력", "/search-history"],
     ["내 계정", "/account"],
@@ -569,9 +573,9 @@ export default function Console() {
       <main className="login-page">
         <div className="login-brand">트레이드옵스 허브</div>
         <form className="login-card" onSubmit={login}>
-          <p className="eyebrow">우려거래자 데이터 관리</p>
+          <p className="eyebrow">무역안보 업무 도구</p>
           <h1>로그인</h1>
-          <p>계정으로 접속해 BIS 공개자료를 조회하고 관리하세요.</p>
+          <p>계정으로 접속해 우려거래자 자료와 법령을 검색하세요.</p>
           <label>
             아이디
             <input
@@ -667,6 +671,7 @@ export default function Console() {
               </button>
             </div>
           )}
+          {path === "/law-search" && <LawSearch onAuthError={fail} />}
           {isSearch && (
             <>
               <form className="panel filters" onSubmit={submitSearch}>
