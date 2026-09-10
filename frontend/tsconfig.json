@@ -48,7 +48,11 @@
     ".next-law-viewport/types/**/*.ts",
     ".next-law-viewport/dev/types/**/*.ts",
     ".next-law-viewport-final/types/**/*.ts",
-    ".next-law-viewport-final/dev/types/**/*.ts"
+    ".next-law-viewport-final/dev/types/**/*.ts",
+    ".next-law-status-frames/types/**/*.ts",
+    ".next-law-status-frames/dev/types/**/*.ts",
+    ".next-law-notice-severity/types/**/*.ts",
+    ".next-law-notice-severity/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

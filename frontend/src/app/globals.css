@@ -991,20 +991,61 @@ summary {
 .law-status-counts {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
+.law-status-counts > div {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fafbfd;
+}
 .law-status-metadata {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   font-size: 12px;
   gap: 16px;
+  padding: 10px 12px;
+  background: #f3f6fa;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+.law-status-metadata > div + div {
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
 }
 .law-status-notices {
   display: flex;
   gap: 18px;
   align-items: baseline;
   font-size: 13px;
+  padding: 9px 12px;
+  background: #fff9e9;
+  border: 1px solid #ecdfb9;
+  border-radius: 7px;
+  color: #61502c;
 }
 .law-status-notices ul {
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
+  list-style: none;
+}
+.law-notice-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.law-notice-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 8px;
+  background: #64748b;
+}
+.law-notice-urgent .law-notice-dot {
+  background: #c62828;
+}
+.law-notice-check .law-notice-dot {
+  background: #c76b00;
+}
+.law-notice-level {
+  margin-right: 5px;
 }
 .law-status-notices p {
   margin: 0;
@@ -1095,5 +1136,9 @@ summary {
   }
   .law-status-notices {
     display: block;
+  }
+  .law-status-metadata > div + div {
+    border-left: 0;
+    padding-left: 0;
   }
 }

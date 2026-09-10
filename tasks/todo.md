@@ -1,5 +1,11 @@
 # Delivery checklist — BIS workspace
 
+## Monorepo migration
+
+- [ ] Import all law-service commits under services/law-search without squashing; preserve original checkout, configuration, DB and embeddings.
+- [ ] Update root/service guidance, README, paired architecture/runbook links and isolated verification entry point for one repository with separate processes/storage.
+- [ ] Verify tree/history parity, both service test suites, build and existing runtime; publish integrated repository and document old-repository retirement conditions.
+
 ## Law search integration — feat/law-search
 
 - [x] Restore synchronization metadata and actionable status notices; fit desktop administration to viewport with internal list scrolling, split actions/runs, and reveal selected law details. Fifteen focused API tests, full local gate, final frontend gate and builds passed. Deployed API law-viewport and web .next-law-viewport-final on 8081/3000. Browser checks passed at 2048x1024, 1440x900, 1366x768 (no base document scroll), plus narrow/short fallback. Internal runs/logs/100 mocked traces scroll; law details begin within the viewport. RAG article/vector counts unchanged.

@@ -61,6 +61,8 @@ LawIntegrationTest covers input, states, citations, projection, trace correlatio
 
 ## Owner administration
 
+Action notices use red dots and 긴급 for failed runs/missing index, orange dots and 확인 필요 for stale index/source-history changes, and slate dots with 참고 when no action is needed. Text labels accompany colors.
+
 Status also preserves syncState.lastSyncedCommitSha, lastSyncAt and lastForcePushDetectedAt without source paths. The UI restores sync metadata and notices for failed runs, missing/stale indexes and historical source rewrites. At widths >1100px and heights >=760px the base screen fits the viewport: summary above actions/runs, with internal list scrolling. Selecting a law shortens the corpus list to reveal the start of its details and permits document scrolling. Smaller viewports retain document scrolling. No data/index work runs automatically.
 
 `/law-admin` appears under 법령 조사, immediately after 법령 검색, for the fixed owner. The breadcrumb is 법령 조사 / 법령 검색 관리. Every `/api/v1/law-admin` endpoint also enforces backend owner authorization and the existing account/session restrictions.

@@ -802,21 +802,32 @@ function StatusSummary({ data }: { data: Data & Record<string, unknown> }) {
   const failures = Array.isArray(data.recentFailures)
     ? data.recentFailures.length
     : 0;
-  const notices: string[] = [];
+  const notices: { severity: "urgent" | "check" | "info"; text: string }[] = [];
   if (failures)
-    notices.push(`최근 실패한 수집 작업 ${failures}건을 확인하세요.`);
+    notices.push({
+      severity: "urgent",
+      text: `최근 실패한 수집 작업 ${failures}건을 확인하세요.`,
+    });
   if (data.indexStatus === "missing" || data.indexStatus === "empty")
-    notices.push(
-      "검색 색인이 준비되지 않았습니다. 수집 및 색인 상태를 확인하세요.",
-    );
+    notices.push({
+      severity: "urgent",
+      text: "검색 색인이 준비되지 않았습니다. 수집 및 색인 상태를 확인하세요.",
+    });
   if (data.indexStatus === "stale")
-    notices.push(
-      `저장 조문과 색인 조문 수가 ${Math.abs(Number(data.articlesCount) - Number(data.indexedArticlesCount)).toLocaleString("ko-KR")}건 다릅니다. 색인 상태를 확인하세요.`,
-    );
+    notices.push({
+      severity: "check",
+      text: `저장 조문과 색인 조문 수가 ${Math.abs(Number(data.articlesCount) - Number(data.indexedArticlesCount)).toLocaleString("ko-KR")}건 다릅니다. 색인 상태를 확인하세요.`,
+    });
   if (sync.lastForcePushDetectedAt)
-    notices.push(
-      "원본 이력 변경이 감지된 기록이 있습니다. 다음 수집 전에 변경 내용을 확인하세요.",
-    );
+    notices.push({
+      severity: "check",
+      text: "원본 이력 변경이 감지된 기록이 있습니다. 다음 수집 전에 변경 내용을 확인하세요.",
+    });
+  if (!notices.length)
+    notices.push({
+      severity: "info",
+      text: "현재 확인이 필요한 조치가 없습니다.",
+    });
   return (
     <>
       <dl className="law-admin-stats law-status-counts">
@@ -854,15 +865,23 @@ function StatusSummary({ data }: { data: Data & Record<string, unknown> }) {
       </dl>
       <div className="law-status-notices" aria-label="조치 안내">
         <strong>조치 안내</strong>
-        {notices.length ? (
-          <ul>
-            {notices.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>현재 확인이 필요한 조치가 없습니다.</p>
-        )}
+        <ul className="law-notice-list">
+          {notices.map((n) => (
+            <li key={n.text} className={`law-notice-${n.severity}`}>
+              <span className="law-notice-dot" aria-hidden="true" />
+              <span>
+                <strong className="law-notice-level">
+                  {
+                    { urgent: "긴급", check: "확인 필요", info: "참고" }[
+                      n.severity
+                    ]
+                  }
+                </strong>{" "}
+                {n.text}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </>
   );
