@@ -61,7 +61,7 @@ LawIntegrationTest covers input, states, citations, projection, trace correlatio
 
 ## Owner administration
 
-`/law-admin` appears under 운영 관리 for the fixed owner. Every `/api/v1/law-admin` endpoint also enforces backend owner authorization and the existing account/session restrictions.
+`/law-admin` appears under 법령 조사, immediately after 법령 검색, for the fixed owner. The breadcrumb is 법령 조사 / 법령 검색 관리. Every `/api/v1/law-admin` endpoint also enforces backend owner authorization and the existing account/session restrictions.
 
 GET `/{section}` allows only status, laws, ingestion-runs, search-logs and agent-traces. Laws accept q (<=200 characters) and page (1..10000), size is fixed at 20. Traces accept an empty or canonical UUID requestId. GET `/laws/{id}` and `/laws/{id}/revisions` require positive IDs. Lists preserve upstream limits: 20 ingestion runs, 50 search logs, 100 traces. Logs link to filtered traces. Response projection excludes question previews/hashes, trace input/output, raw errors, source paths and repository URLs.
 
@@ -70,3 +70,5 @@ POST `/actions/{action}` accepts only an empty JSON object and requires CSRF. Ac
 The existing bounded client does not retry. A timeout or browser navigation does not promise upstream cancellation; inspect status and run history before manually retrying. This is not a durable cross-process job queue. Source settings must already exist in the RAG environment; missing settings produce a safe failure. No RAG code, Git history, DB or embedding data is copied into Hub.
 
 Administration verification: 14 focused cases and full local gate passed; primary API/web deployment and existing-owner browser navigation succeeded. Real reads showed 44 laws, a 424-article law detail, 6 ingestion runs and four stages for a selected request. Four action paths were intercepted in the browser; no actual mutation/provider test was sent. Hub accounts (3), BIS rows (8642), RAG articles (4112), vectors (4431) and RAG PID were unchanged. The last 390px button-wrap correction passed the frontend gate, production build and injected-CSS 390/768/1440 checks; automatic review blocked its web restart. The functional admin build is live; the final responsive build awaits manual startup and served-CSS verification.
+
+Administration has three tabs: operating status (status, actions, then ingestion history), corpus, and search logs. Search logs and the selected request trace share equal-width columns, stacked at widths <=1100px. Clicking a request ID highlights its row, fills the trace input and loads that request without leaving the list. Direct UUID lookup, reset, independent loading/errors and cancellation of stale requests are supported. Before selection no unfiltered trace request is sent. Existing APIs and owner authorization are unchanged.

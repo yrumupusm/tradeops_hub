@@ -932,3 +932,41 @@ summary {
 .law-admin details {
   padding: 12px 0;
 }
+.law-admin-log-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.law-admin-log-split .panel {
+  min-width: 0;
+}
+.law-admin-log-split table {
+  min-width: 480px;
+  table-layout: fixed;
+  width: 100%;
+}
+.law-admin-log-split th,
+.law-admin-log-split td {
+  white-space: normal;
+}
+.law-admin-log-split .law-request-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1768ae;
+  text-align: left;
+  text-decoration: underline;
+  font: inherit;
+}
+.law-log-selected td {
+  background: #e7f1fc;
+}
+.law-selected-request {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .law-admin-log-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

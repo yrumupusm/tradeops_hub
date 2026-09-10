@@ -536,13 +536,13 @@ export default function Console() {
     ["수집 이력", "/watchlist/runs"],
     ["법령 조사", ""],
     ["법령 검색", "/law-search"],
+    ...(user?.owner ? [["법령 검색 관리", "/law-admin"]] : []),
     ["내 작업", ""],
     ["내 검색 이력", "/search-history"],
     ["내 계정", "/account"],
     ...(user?.owner
       ? [
           ["운영 관리", ""],
-          ["법령 검색 관리", "/law-admin"],
           ["사용자 관리", "/users"],
           ["감사 이력", "/audit"],
         ]

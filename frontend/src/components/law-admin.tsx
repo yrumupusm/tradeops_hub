@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { request } from "../lib/api";
 
 type Row = Record<string, string | number | boolean | null>;
@@ -9,9 +9,7 @@ type Detail = { title: string; articles: Row[]; revisions?: Row[] };
 const tabs = [
   ["status", "운영 현황"],
   ["laws", "보유 법령"],
-  ["ingestion-runs", "수집 이력"],
   ["search-logs", "검색 로그"],
-  ["agent-traces", "실행 추적"],
 ];
 const labels: Record<string, string> = {
   OK: "정상",
@@ -135,6 +133,7 @@ export default function LawAdmin({
   const [detail, setDetail] = useState<Detail | null>(null);
   const [detailError, setDetailError] = useState("");
   useEffect(() => {
+    if (tab === "search-logs") return;
     const controller = new AbortController();
     setPending(true);
     setError("");
@@ -211,255 +210,269 @@ export default function LawAdmin({
           </button>
         ))}
       </nav>
-      {tab === "status" && (
-        <section className="panel">
-          <h2>관리 작업</h2>
-          <p className="muted">
-            법령 서버에 설정된 자료 저장소와 경로를 사용합니다.
-            수집·동기화·재색인은 법령 데이터와 색인을 갱신합니다.
-          </p>
-          <div className="law-admin-tabs">
-            {Object.entries(actionNames).map(([key, label]) => (
+      {tab !== "search-logs" && (
+        <>
+          <section className="panel">
+            <div className="law-admin-toolbar">
+              <h2>{tabs.find(([value]) => value === tab)?.[1]}</h2>
               <button
-                key={key}
-                disabled={
-                  running ||
-                  pending ||
-                  !!error ||
-                  (key === "reindex" && data.reindexEnabled !== true)
-                }
-                onClick={() => {
-                  setAction(key);
-                  setActionMessage("");
+                disabled={pending}
+                onClick={() => setRevision((v) => v + 1)}
+              >
+                새로고침
+              </button>
+            </div>
+            {(tab === "laws" || tab === "agent-traces") && (
+              <form
+                className="law-admin-toolbar"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setQuery(draft.trim());
+                  setPage(1);
+                  setRevision((v) => v + 1);
+                  setSelected(null);
                 }}
               >
-                {label}
-              </button>
-            ))}
-          </div>
-          {data.reindexEnabled === false && (
-            <p className="muted">
-              재색인은 법령 서버에서 비활성화되어 있습니다.
-            </p>
-          )}
-          {action && !running && (
-            <div role="group" aria-label="관리 작업 확인">
-              <p>
-                {actionNames[action]} 작업을 실행할까요?
-                {action !== "provider-smoke-test"
-                  ? " 기존 자료 또는 색인이 변경될 수 있습니다."
-                  : " 외부 모델 서비스 호출이 발생합니다."}
-              </p>
-              <button className="primary" onClick={execute}>
-                실행
-              </button>{" "}
-              <button onClick={() => setAction("")}>취소</button>
-            </div>
-          )}
-          {running && (
-            <p role="status">
-              관리 작업을 처리하는 중입니다. 완료까지 기다려 주세요.
-            </p>
-          )}
-          <p role="status">{actionMessage}</p>
-          {actionResult && (
-            <dl className="law-admin-stats">
-              {Object.entries(actionResult)
-                .filter(([, value]) => typeof value !== "object")
-                .map(([key, value]) => (
-                  <div key={key}>
-                    <dt>
-                      {{
-                        status: "상태",
-                        llmStatus: "답변 모델",
-                        embeddingStatus: "임베딩",
-                        rerankerStatus: "재정렬",
-                        indexedArticles: "색인 조문",
-                        failedArticles: "실패 조문",
-                        lawsImported: "수집 법령",
-                        articlesImported: "수집 조문",
-                        filesProcessed: "처리 파일",
-                        filesFailed: "실패 파일",
-                        startedAt: "시작 시각",
-                        finishedAt: "완료 시각",
-                        snapshotVersion: "스냅샷",
-                        ingestionRunId: "실행 번호",
-                        embeddingDimensions: "벡터 차원",
-                        rerankedCount: "재정렬 건수",
-                        action: "동기화 결과",
-                        commitHash: "자료 리비전",
-                      }[key] ?? key}
-                    </dt>
-                    <dd>{display(value)}</dd>
-                  </div>
-                ))}
-            </dl>
-          )}
-        </section>
-      )}
-      <section className="panel">
-        <div className="law-admin-toolbar">
-          <h2>{tabs.find(([value]) => value === tab)?.[1]}</h2>
-          <button disabled={pending} onClick={() => setRevision((v) => v + 1)}>
-            새로고침
-          </button>
-        </div>
-        {(tab === "laws" || tab === "agent-traces") && (
-          <form
-            className="law-admin-toolbar"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setQuery(draft.trim());
-              setPage(1);
-              setRevision((v) => v + 1);
-              setSelected(null);
-            }}
-          >
-            <label>
-              {tab === "laws" ? "법령명" : "요청 ID"}
-              <input
-                value={draft}
-                maxLength={tab === "laws" ? 200 : 36}
-                onChange={(e) => setDraft(e.target.value)}
-              />
-            </label>
-            <button disabled={pending}>조회</button>
-            <button
-              type="button"
-              onClick={() => {
-                setDraft("");
-                setQuery("");
-                setPage(1);
-              }}
-            >
-              초기화
-            </button>
-          </form>
-        )}
-        {error && <p role="alert">{error}</p>}
-        {pending ? (
-          <p role="status">불러오는 중입니다.</p>
-        ) : (
-          !error &&
-          (tab === "status" ? (
-            <dl className="law-admin-stats">
-              {[
-                ["indexStatus", "색인 상태"],
-                ["lawsCount", "보유 법령"],
-                ["articlesCount", "조문"],
-                ["indexedArticlesCount", "색인 조문"],
-                ["unindexedArticlesCount", "미색인 조문"],
-                ["searchLogCount", "검색 로그"],
-                ["lastSnapshotVersion", "최근 스냅샷"],
-                ["lastIndexedAt", "최근 색인 시각"],
-              ].map(([key, label]) => (
-                <div key={key}>
-                  <dt>{label}</dt>
-                  <dd>{display(data[key])}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : (
-            <>
-              <div
-                className="law-admin-table"
-                role="region"
-                aria-label="조회 결과"
-                tabIndex={0}
-              >
-                <table>
-                  <thead>
-                    <tr>
-                      {columns[tab].map(([key, label]) => (
-                        <th key={key}>{label}</th>
-                      ))}
-                      {(tab === "laws" || tab === "search-logs") && (
-                        <th>상세</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(data.items ?? []).map((row, i) => (
-                      <tr
-                        key={String(
-                          row.id ?? row.lawId ?? row.ingestionRunId ?? i,
-                        )}
-                      >
-                        {columns[tab].map(([key]) => (
-                          <td key={key}>{display(row[key])}</td>
+                <label>
+                  {tab === "laws" ? "법령명" : "요청 ID"}
+                  <input
+                    value={draft}
+                    maxLength={tab === "laws" ? 200 : 36}
+                    onChange={(e) => setDraft(e.target.value)}
+                  />
+                </label>
+                <button disabled={pending}>조회</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft("");
+                    setQuery("");
+                    setPage(1);
+                  }}
+                >
+                  초기화
+                </button>
+              </form>
+            )}
+            {error && <p role="alert">{error}</p>}
+            {pending ? (
+              <p role="status">불러오는 중입니다.</p>
+            ) : (
+              !error &&
+              (tab === "status" ? (
+                <dl className="law-admin-stats">
+                  {[
+                    ["indexStatus", "색인 상태"],
+                    ["lawsCount", "보유 법령"],
+                    ["articlesCount", "조문"],
+                    ["indexedArticlesCount", "색인 조문"],
+                    ["unindexedArticlesCount", "미색인 조문"],
+                    ["searchLogCount", "검색 로그"],
+                    ["lastSnapshotVersion", "최근 스냅샷"],
+                    ["lastIndexedAt", "최근 색인 시각"],
+                  ].map(([key, label]) => (
+                    <div key={key}>
+                      <dt>{label}</dt>
+                      <dd>{display(data[key])}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <>
+                  <div
+                    className="law-admin-table"
+                    role="region"
+                    aria-label="조회 결과"
+                    tabIndex={0}
+                  >
+                    <table>
+                      <thead>
+                        <tr>
+                          {columns[tab].map(([key, label]) => (
+                            <th key={key}>{label}</th>
+                          ))}
+                          {(tab === "laws" || tab === "search-logs") && (
+                            <th>상세</th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(data.items ?? []).map((row, i) => (
+                          <tr
+                            key={String(
+                              row.id ?? row.lawId ?? row.ingestionRunId ?? i,
+                            )}
+                          >
+                            {columns[tab].map(([key]) => (
+                              <td key={key}>{display(row[key])}</td>
+                            ))}
+                            {tab === "laws" && (
+                              <td>
+                                <button
+                                  aria-expanded={selected === Number(row.lawId)}
+                                  onClick={() =>
+                                    setSelected(
+                                      selected === Number(row.lawId)
+                                        ? null
+                                        : Number(row.lawId),
+                                    )
+                                  }
+                                >
+                                  조문 보기
+                                </button>
+                              </td>
+                            )}
+                            {tab === "search-logs" && (
+                              <td>
+                                <button
+                                  onClick={() =>
+                                    changeTab(
+                                      "agent-traces",
+                                      String(row.requestId),
+                                    )
+                                  }
+                                >
+                                  실행 추적
+                                </button>
+                              </td>
+                            )}
+                          </tr>
                         ))}
-                        {tab === "laws" && (
-                          <td>
-                            <button
-                              aria-expanded={selected === Number(row.lawId)}
-                              onClick={() =>
-                                setSelected(
-                                  selected === Number(row.lawId)
-                                    ? null
-                                    : Number(row.lawId),
-                                )
-                              }
-                            >
-                              조문 보기
-                            </button>
-                          </td>
-                        )}
-                        {tab === "search-logs" && (
-                          <td>
-                            <button
-                              onClick={() =>
-                                changeTab("agent-traces", String(row.requestId))
-                              }
-                            >
-                              실행 추적
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {!data.items?.length && <p>조회 결과가 없습니다.</p>}
+                      </tbody>
+                    </table>
+                  </div>
+                  {!data.items?.length && <p>조회 결과가 없습니다.</p>}
+                  <p className="muted">
+                    총{" "}
+                    {Number(data.total ?? data.totalCount ?? 0).toLocaleString(
+                      "ko-KR",
+                    )}
+                    건
+                    {tab === "search-logs"
+                      ? " · 최근 50건 표시"
+                      : tab === "agent-traces"
+                        ? " · 최대 100건 표시"
+                        : ""}
+                  </p>
+                  {tab === "laws" && (
+                    <div className="law-admin-tabs">
+                      <button
+                        disabled={page === 1}
+                        onClick={() => {
+                          setPage((p) => p - 1);
+                          setSelected(null);
+                        }}
+                      >
+                        이전
+                      </button>
+                      <span>{page}페이지</span>
+                      <button
+                        disabled={page * 20 >= Number(data.total ?? 0)}
+                        onClick={() => {
+                          setPage((p) => p + 1);
+                          setSelected(null);
+                        }}
+                      >
+                        다음
+                      </button>
+                    </div>
+                  )}
+                </>
+              ))
+            )}
+          </section>
+          {tab === "status" && (
+            <section className="panel">
+              <h2>관리 작업</h2>
               <p className="muted">
-                총{" "}
-                {Number(data.total ?? data.totalCount ?? 0).toLocaleString(
-                  "ko-KR",
-                )}
-                건
-                {tab === "search-logs"
-                  ? " · 최근 50건 표시"
-                  : tab === "agent-traces"
-                    ? " · 최대 100건 표시"
-                    : ""}
+                법령 서버에 설정된 자료 저장소와 경로를 사용합니다.
+                수집·동기화·재색인은 법령 데이터와 색인을 갱신합니다.
               </p>
-              {tab === "laws" && (
-                <div className="law-admin-tabs">
+              <div className="law-admin-tabs">
+                {Object.entries(actionNames).map(([key, label]) => (
                   <button
-                    disabled={page === 1}
+                    key={key}
+                    disabled={
+                      running ||
+                      pending ||
+                      !!error ||
+                      (key === "reindex" && data.reindexEnabled !== true)
+                    }
                     onClick={() => {
-                      setPage((p) => p - 1);
-                      setSelected(null);
+                      setAction(key);
+                      setActionMessage("");
                     }}
                   >
-                    이전
+                    {label}
                   </button>
-                  <span>{page}페이지</span>
-                  <button
-                    disabled={page * 20 >= Number(data.total ?? 0)}
-                    onClick={() => {
-                      setPage((p) => p + 1);
-                      setSelected(null);
-                    }}
-                  >
-                    다음
-                  </button>
+                ))}
+              </div>
+              {data.reindexEnabled === false && (
+                <p className="muted">
+                  재색인은 법령 서버에서 비활성화되어 있습니다.
+                </p>
+              )}
+              {action && !running && (
+                <div role="group" aria-label="관리 작업 확인">
+                  <p>
+                    {actionNames[action]} 작업을 실행할까요?
+                    {action !== "provider-smoke-test"
+                      ? " 기존 자료 또는 색인이 변경될 수 있습니다."
+                      : " 외부 모델 서비스 호출이 발생합니다."}
+                  </p>
+                  <button className="primary" onClick={execute}>
+                    실행
+                  </button>{" "}
+                  <button onClick={() => setAction("")}>취소</button>
                 </div>
               )}
-            </>
-          ))
-        )}
-      </section>
+              {running && (
+                <p role="status">
+                  관리 작업을 처리하는 중입니다. 완료까지 기다려 주세요.
+                </p>
+              )}
+              <p role="status">{actionMessage}</p>
+              {actionResult && (
+                <dl className="law-admin-stats">
+                  {Object.entries(actionResult)
+                    .filter(([, value]) => typeof value !== "object")
+                    .map(([key, value]) => (
+                      <div key={key}>
+                        <dt>
+                          {{
+                            status: "상태",
+                            llmStatus: "답변 모델",
+                            embeddingStatus: "임베딩",
+                            rerankerStatus: "재정렬",
+                            indexedArticles: "색인 조문",
+                            failedArticles: "실패 조문",
+                            lawsImported: "수집 법령",
+                            articlesImported: "수집 조문",
+                            filesProcessed: "처리 파일",
+                            filesFailed: "실패 파일",
+                            startedAt: "시작 시각",
+                            finishedAt: "완료 시각",
+                            snapshotVersion: "스냅샷",
+                            ingestionRunId: "실행 번호",
+                            embeddingDimensions: "벡터 차원",
+                            rerankedCount: "재정렬 건수",
+                            action: "동기화 결과",
+                            commitHash: "자료 리비전",
+                          }[key] ?? key}
+                        </dt>
+                        <dd>{display(value)}</dd>
+                      </div>
+                    ))}
+                </dl>
+              )}
+            </section>
+          )}
+          {tab === "status" && (
+            <RunHistory revision={revision} onAuthError={onAuthError} />
+          )}
+        </>
+      )}
+      {tab === "search-logs" && <SearchLogs onAuthError={onAuthError} />}
       {selected !== null && (
         <section className="panel" aria-label="법령 상세">
           {detailError ? (
@@ -489,6 +502,288 @@ export default function LawAdmin({
           )}
         </section>
       )}
+    </div>
+  );
+}
+
+type AuthFailure = { onAuthError: (error: unknown) => void };
+function useAdminList(
+  path: string | null,
+  revision: number,
+  onAuthError: AuthFailure["onAuthError"],
+) {
+  const [state, setState] = useState<{
+    path: string | null;
+    data: Data;
+    pending: boolean;
+    error: string;
+  }>({ path: null, data: {}, pending: false, error: "" });
+  const auth = useRef(onAuthError);
+  auth.current = onAuthError;
+  useEffect(() => {
+    const controller = new AbortController();
+    setState({ path, data: {}, pending: !!path, error: "" });
+    if (path)
+      request<Data>(path, { signal: controller.signal })
+        .then((data) => {
+          if (!controller.signal.aborted)
+            setState({ path, data, pending: false, error: "" });
+        })
+        .catch((error) => {
+          if (!controller.signal.aborted) {
+            setState({
+              path,
+              data: {},
+              pending: false,
+              error:
+                error instanceof Error ? error.message : "조회에 실패했습니다.",
+            });
+            auth.current(error);
+          }
+        });
+    return () => controller.abort();
+  }, [path, revision]);
+  return state.path === path
+    ? state
+    : { path, data: {}, pending: !!path, error: "" };
+}
+function DataTable({
+  data,
+  fields,
+  name,
+}: {
+  data: Data;
+  fields: [string, string][];
+  name: string;
+}) {
+  return (
+    <>
+      <div
+        className="law-admin-table"
+        role="region"
+        aria-label={name}
+        tabIndex={0}
+      >
+        <table>
+          <thead>
+            <tr>
+              {fields.map(([key, label]) => (
+                <th key={key}>{label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.items?.map((row, i) => (
+              <tr key={String(row.id ?? row.ingestionRunId ?? i)}>
+                {fields.map(([key]) => (
+                  <td key={key}>{display(row[key])}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {!data.items?.length && <p>조회 결과가 없습니다.</p>}
+    </>
+  );
+}
+function RunHistory({
+  revision,
+  onAuthError,
+}: AuthFailure & { revision: number }) {
+  const [refresh, setRefresh] = useState(0);
+  const state = useAdminList(
+    "/law-admin/ingestion-runs",
+    revision + refresh,
+    onAuthError,
+  );
+  return (
+    <section className="panel" aria-label="수집 이력">
+      <div className="law-admin-toolbar">
+        <h2>수집 이력</h2>
+        <button
+          disabled={state.pending}
+          onClick={() => setRefresh((v) => v + 1)}
+        >
+          수집 이력 새로고침
+        </button>
+      </div>
+      {state.pending ? (
+        <p role="status">수집 이력을 불러오는 중입니다.</p>
+      ) : state.error ? (
+        <p role="alert">{state.error}</p>
+      ) : (
+        <>
+          <DataTable
+            data={state.data}
+            fields={columns["ingestion-runs"]}
+            name="수집 이력 목록"
+          />
+          <p className="muted">
+            총 {display(state.data.totalCount ?? 0)}건 · 최근 20건 표시
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
+function SearchLogs({ onAuthError }: AuthFailure) {
+  const [revision, setRevision] = useState(0);
+  const [traceRevision, setTraceRevision] = useState(0);
+  const [selected, setSelected] = useState("");
+  const [draft, setDraft] = useState("");
+  const [inputError, setInputError] = useState("");
+  const logs = useAdminList("/law-admin/search-logs", revision, onAuthError);
+  const traces = useAdminList(
+    selected
+      ? `/law-admin/agent-traces?requestId=${encodeURIComponent(selected)}`
+      : null,
+    traceRevision,
+    onAuthError,
+  );
+  function select(id: string) {
+    setSelected(id);
+    setDraft(id);
+    setInputError("");
+    setTraceRevision((v) => v + 1);
+  }
+  return (
+    <div className="law-admin-log-split">
+      <section className="panel" aria-label="검색 로그 목록">
+        <div className="law-admin-toolbar">
+          <h2>검색 로그</h2>
+          <button
+            disabled={logs.pending}
+            onClick={() => setRevision((v) => v + 1)}
+          >
+            새로고침
+          </button>
+        </div>
+        {logs.pending ? (
+          <p role="status">검색 로그를 불러오는 중입니다.</p>
+        ) : logs.error ? (
+          <p role="alert">{logs.error}</p>
+        ) : (
+          <>
+            <div
+              className="law-admin-table"
+              role="region"
+              aria-label="검색 로그 표"
+              tabIndex={0}
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>검색 시각</th>
+                    <th>상태</th>
+                    <th>인용 수</th>
+                    <th>요청 ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.data.items?.map((row, i) => (
+                    <tr
+                      key={String(row.id ?? i)}
+                      className={
+                        row.requestId === selected ? "law-log-selected" : ""
+                      }
+                    >
+                      <td>{display(row.createdAt)}</td>
+                      <td>{display(row.status)}</td>
+                      <td>{display(row.citedArticleCount)}</td>
+                      <td>
+                        <button
+                          className="law-request-link"
+                          aria-pressed={row.requestId === selected}
+                          aria-controls="law-request-traces"
+                          onClick={() => select(String(row.requestId))}
+                        >
+                          {row.requestId}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!logs.data.items?.length && <p>검색 로그가 없습니다.</p>}
+            <p className="muted">
+              총 {display(logs.data.total ?? 0)}건 · 최근 50건 표시
+            </p>
+          </>
+        )}
+      </section>
+      <section
+        className="panel"
+        id="law-request-traces"
+        aria-label="선택한 요청의 실행 추적"
+      >
+        <h2>실행 추적</h2>
+        <form
+          className="law-admin-toolbar"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const id = draft.trim();
+            if (
+              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+                id,
+              )
+            ) {
+              setInputError("올바른 요청 ID를 입력하세요.");
+              return;
+            }
+            select(id);
+          }}
+        >
+          <label>
+            요청 ID
+            <input
+              value={draft}
+              maxLength={36}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+          </label>
+          <button>조회</button>
+          <button
+            type="button"
+            onClick={() => {
+              setSelected("");
+              setDraft("");
+              setInputError("");
+            }}
+          >
+            초기화
+          </button>
+        </form>
+        {inputError && <p role="alert">{inputError}</p>}
+        {selected && (
+          <p className="law-selected-request">선택한 요청: {selected}</p>
+        )}
+        <div aria-live="polite">
+          {!selected ? (
+            <p className="muted">
+              검색 로그를 선택하면 처리 과정을 볼 수 있습니다.
+            </p>
+          ) : traces.pending ? (
+            <p role="status">실행 추적을 불러오는 중입니다.</p>
+          ) : traces.error ? (
+            <p role="alert">{traces.error}</p>
+          ) : (
+            <>
+              <DataTable
+                data={traces.data}
+                fields={columns["agent-traces"].filter(
+                  ([key]) => key !== "requestId",
+                )}
+                name="선택한 요청의 처리 단계"
+              />
+              <p className="muted">
+                총 {display(traces.data.total ?? 0)}건 · 최대 100건 표시
+              </p>
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
