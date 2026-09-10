@@ -1,6 +1,8 @@
 # Architecture decisions
 
-- [0001 — Web, API and relational storage](0001-web-api-relational-storage.md): retained.
+[한국어](../../ko/adr/README.md) · [English](README.md)
+
+- [0001 — Web, API and relational storage](0001-web-api-relational-storage.md): separation principle retained; detailed implementation is historical. See C4 and 0005 for current behavior.
 - [0002 — Versioned snapshots](0002-versioned-snapshots.md): historical; BIS row identity is superseded by 0005.
 - [0003 — Local source boundary](0003-local-source-boundary.md): historical; public BIS collection replaces the local-only boundary.
 - [0004 — Authorization and traceability](0004-authorization-and-traceability.md): historical; server sessions and a fixed owner replace JWT/roles.

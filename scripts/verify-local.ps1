@@ -35,7 +35,7 @@ function Resolve-MavenCommand {
 Set-Location -LiteralPath $ProjectRoot
 
 Invoke-Step "Repository safety and scenario validation" {
-    $required = @("AGENTS.md", "PROJECT_GUIDE.md", "docs\api-contract.md", "docs\evaluation-harness.md", "harness\scenarios.json", ".env.example")
+    $required = @("AGENTS.md", "PROJECT_GUIDE.md", "docs\en\api-contract.md", "docs\en\evaluation-harness.md", "harness\scenarios.json", ".env.example")
     foreach ($path in $required) { Assert-File $path }
     $scenarios = Get-Content -LiteralPath "harness\scenarios.json" -Raw -Encoding UTF8 | ConvertFrom-Json
     if (@($scenarios).Count -lt 4) { throw "Expected at least four fixed scenarios." }

@@ -1,5 +1,7 @@
 # API contract
 
+[한국어](../ko/api-contract.md) · [English](api-contract.md)
+
 Base: `/api/v1`. The browser uses the Next.js same-origin proxy. JSON DTOs use camelCase; database-backed row objects explicitly use snake_case fields (below). Unknown request fields fail with 400. Errors contain a bounded `code`, safe `message`, `correlationId` and optionally `timestamp`. Every API response carries `X-Correlation-Id`.
 
 ## Authentication

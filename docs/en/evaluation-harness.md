@@ -1,5 +1,7 @@
 # Verification harness
 
+[한국어](../ko/evaluation-harness.md) · [English](evaluation-harness.md)
+
 ## Layers
 
 - `scripts/verify-local.ps1 -MavenPath <mvn.cmd>`: server-free unit/parser tests, evidence-tool tests and TypeScript checks. PostgreSQL-only tests are explicitly skipped here.
@@ -22,4 +24,4 @@ Real BIS connectivity is a separate live acceptance check: run DPL/EL against th
 
 ## Latest delivery status
 
-See [tasks](../tasks/todo.md) for which gates and browser checks have actually been executed for this revision. Do not reuse the earlier transaction/JWT suite's successful result for the BIS implementation.
+See [tasks](../../tasks/todo.md) for which gates and browser checks have actually been executed for this revision. Do not reuse the earlier transaction/JWT suite's successful result for the BIS implementation.

@@ -25,7 +25,7 @@ Java 17, Maven, Node.js 22 이상, Docker가 필요합니다.
 
 ## 검증
 
-`scripts/verify-local.ps1`은 서버 없이 단위 테스트·검증 도구 테스트·프런트엔드 타입 검사를 실행합니다. 실제 PostgreSQL 통합/성능 검증과 격리 런타임 검증은 [검증 안내](docs/evaluation-harness.md)를 참고하세요. 실데이터와 생성 결과는 Git에 포함하지 않습니다.
+`scripts/verify-local.ps1`은 서버 없이 단위 테스트·검증 도구 테스트·프런트엔드 타입 검사를 실행합니다. 실제 PostgreSQL 통합/성능 검증과 격리 런타임 검증은 [검증 안내](docs/ko/evaluation-harness.md)를 참고하세요. 실데이터와 생성 결과는 Git에 포함하지 않습니다.
 
 ## 아키텍처
 
@@ -49,12 +49,12 @@ flowchart LR
 
 | 문서 | 내용 |
 | --- | --- |
-| [C4 모델](docs/architecture/c4.md) | 시스템 경계, 실행 구성과 API 내부 컴포넌트 |
-| [ADR](docs/adr/README.md) | 주요 설계 결정과 대안, 결과 |
-| [arc42](docs/arc42.md) | 요구사항, 실행 흐름, 배포 구성과 품질 목표 |
-| [제품 범위](docs/product-scope.md) | 구현 기능과 범위 |
-| [API 계약](docs/api-contract.md) | 엔드포인트, 권한과 데이터 계약 |
-| [수집·갱신 설계](docs/watchlist-update-design.md) | 원본 검증, 버전 비교와 반영 정책 |
-| [운영 안내](docs/runbook.md) | 실행, 환경 설정과 운영 절차 |
+| [C4 모델](docs/ko/architecture/c4.md) | 시스템 경계, 실행 구성과 API 내부 컴포넌트 |
+| [ADR](docs/ko/adr/README.md) | 주요 설계 결정과 대안, 결과 |
+| [arc42](docs/ko/arc42.md) | 요구사항, 실행 흐름, 배포 구성과 품질 목표 |
+| [제품 범위](docs/ko/product-scope.md) | 구현 기능과 범위 |
+| [API 계약](docs/ko/api-contract.md) | 엔드포인트, 권한과 데이터 계약 |
+| [수집·갱신 설계](docs/ko/watchlist-update-design.md) | 원본 검증, 버전 비교와 반영 정책 |
+| [운영 안내](docs/ko/runbook.md) | 실행, 환경 설정과 운영 절차 |
 
 BIS [공식 안내 페이지](https://www.bis.gov/licensing/guidance-on-end-user-and-end-use-controls-and-us-person-controls)에서 제공하는 공개 파일을 사용합니다. 회사 코드·내부 데이터·계정 정보를 포함하지 않는 독립 구현입니다.

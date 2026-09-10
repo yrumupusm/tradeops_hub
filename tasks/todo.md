@@ -39,6 +39,7 @@ Earlier transaction/JWT/fictional-source deliveries are recorded in Git history.
 - [ ] Start the already-built web release on 3000 and verify browser login/collection. Both background and foreground web launch were rejected again by automatic approval review, without a specific reason.
 
 ## Console refinement
+- [x] Split design/operations documents into 14 paired ko/en pages (including indexes and historical ADRs); add language switches and a correspondence index. README defaults to Korean, agent guidance to English, with same-commit synchronization and Korean UX rules. Pairing/local links/code fences and the frontend/local documentation gate passed; application behavior unchanged.
 - [x] Add five distinct private recent search terms under the search input, rerun against current data and delete matching history entries. Focused PostgreSQL ownership/deduplication/deletion regression and full local gate passed. Browser visual verification and API/web rebuild/restart pending.
 - [x] Replace the source-card internal snapshot number with the current snapshot creation date (최근 데이터 변경일). Unchanged-file checks retain the date; empty sources show a dash. Full local gate passed; API/web rebuild and restart pending.
 - [x] Reshape search CSV around Korean-labelled original fields, omit search/internal metadata and preserve source-specific raw values. Focused CSV mapping/escaping test, full local gate and all 11 PostgreSQL integration tests passed (Surefire report); production backend rebuild/restart pending.

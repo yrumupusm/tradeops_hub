@@ -1,5 +1,9 @@
 # ADR 0002: 원본 버전별 스냅샷과 체크섬 기반 중복 처리
 
+[한국어](0002-versioned-snapshots.md) · [English](../../en/adr/0002-versioned-snapshots.md)
+
+> 과거 결정 기록입니다. 현재 BIS 구현은 [ADR 0005](0005-bis-sessions-and-provenance.md)와 [C4](../architecture/c4.md)를 참고하세요. 웹·API 분리 원칙은 유지하지만 당시 세부 구현을 현재 계약으로 해석하지 않습니다.
+
 **상태:** 채택 · **기록일:** 2026-09-08
 
 ## 상황
@@ -28,4 +32,4 @@
 
 ## 근거
 
-[WatchlistUpdateService](../../backend/src/main/java/io/tradeops/watchlist/service/WatchlistUpdateService.java), [V2 스키마](../../backend/src/main/resources/db/migration/V2__create_watchlist_run_snapshot_tables.sql), [갱신 통합 테스트](../../backend/src/test/java/io/tradeops/watchlist/WatchlistRunIntegrationTest.java).
+[WatchlistUpdateService](../../../backend/src/main/java/io/tradeops/watchlist/service/WatchlistUpdateService.java), [V2 스키마](../../../backend/src/main/resources/db/migration/V2__create_watchlist_run_snapshot_tables.sql), 과거 갱신 통합 테스트(삭제된 WatchlistRunIntegrationTest는 Git 이력 참고).

@@ -1,5 +1,7 @@
 # ADR 0005: BIS collection, server sessions and row provenance
 
+[한국어](../../ko/adr/0005-bis-sessions-and-provenance.md) · [English](0005-bis-sessions-and-provenance.md)
+
 Status: Accepted, 2026-09-09. Supersedes the live-source exclusion in ADR 0003, the role/JWT model in ADR 0004 and stable external-ID assumptions in ADR 0002 for the active BIS module.
 
 ## Context

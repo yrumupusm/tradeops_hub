@@ -1,5 +1,9 @@
 # ADR 0003: 재현 가능한 로컬 원본과 수집 경계
 
+[한국어](0003-local-source-boundary.md) · [English](../../en/adr/0003-local-source-boundary.md)
+
+> 과거 결정 기록입니다. 현재 BIS 구현은 [ADR 0005](0005-bis-sessions-and-provenance.md)와 [C4](../architecture/c4.md)를 참고하세요. 웹·API 분리 원칙은 유지하지만 당시 세부 구현을 현재 계약으로 해석하지 않습니다.
+
 **상태:** 채택 · **기록일:** 2026-09-08
 
 ## 상황
@@ -25,4 +29,4 @@
 
 ## 근거
 
-[원본 로더](../../backend/src/main/java/io/tradeops/watchlist/service/FictionalWatchlistSource.java), [생성기](../../backend/src/main/java/io/tradeops/watchlist/fixture/FictionalWatchlistFixtureGenerator.java), [데이터 사전](../../data/fixtures/watchlist-data-dictionary.md).
+[원본 로더](../../../backend/src/main/java/io/tradeops/watchlist/service/FictionalWatchlistSource.java), [생성기](../../../backend/src/main/java/io/tradeops/watchlist/fixture/FictionalWatchlistFixtureGenerator.java), [데이터 사전](../../../data/fixtures/watchlist-data-dictionary.md).

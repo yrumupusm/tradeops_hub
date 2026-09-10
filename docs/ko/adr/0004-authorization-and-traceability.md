@@ -1,5 +1,9 @@
 # ADR 0004: 서버 권한 제어와 요청 단위 추적
 
+[한국어](0004-authorization-and-traceability.md) · [English](../../en/adr/0004-authorization-and-traceability.md)
+
+> 과거 결정 기록입니다. 현재 BIS 구현은 [ADR 0005](0005-bis-sessions-and-provenance.md)와 [C4](../architecture/c4.md)를 참고하세요. 웹·API 분리 원칙은 유지하지만 당시 세부 구현을 현재 계약으로 해석하지 않습니다.
+
 **상태:** 채택 · **기록일:** 2026-09-08
 
 ## 상황
@@ -26,4 +30,4 @@ Spring Security가 Bearer JWT를 검증하고 백엔드에서 역할을 확인�
 
 ## 근거
 
-[SecurityConfig](../../backend/src/main/java/io/tradeops/auth/SecurityConfig.java), [CorrelationIdFilter](../../backend/src/main/java/io/tradeops/web/CorrelationIdFilter.java), [ScreeningReviewController](../../backend/src/main/java/io/tradeops/screening/ScreeningReviewController.java), [후속 작업](../../tasks/todo.md).
+[SecurityConfig](../../../backend/src/main/java/io/tradeops/auth/SecurityConfig.java), [CorrelationIdFilter](../../../backend/src/main/java/io/tradeops/web/CorrelationIdFilter.java), 과거 ScreeningReviewController(Git 이력 참고), [후속 작업](../../../tasks/todo.md).

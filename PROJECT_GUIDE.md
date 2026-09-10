@@ -28,4 +28,8 @@ Public BIS URLs and public runtime data are explicitly authorized. Company code,
 
 ## Working agreement
 
-Read this file and [tasks](tasks/todo.md) before behavioral edits. Update the checklist first for substantial work. Keep [API](docs/api-contract.md), [scope](docs/product-scope.md), [C4](docs/architecture/c4.md), [ADRs](docs/adr/README.md) and [arc42](docs/arc42.md) aligned. Run focused tests, then the applicable verification gate. Report unfinished checks accurately. Check Git status before/after; never stage ignored data, credentials or generated output.
+Read this file and [tasks](tasks/todo.md) before behavioral edits. Update the checklist first for substantial work. Keep [API](docs/en/api-contract.md), [scope](docs/en/product-scope.md), [C4](docs/en/architecture/c4.md), [ADRs](docs/en/adr/README.md) and [arc42](docs/en/arc42.md) aligned. Run focused tests, then the applicable verification gate. Report unfinished checks accurately. Check Git status before/after; never stage ignored data, credentials or generated output.
+
+## Documentation entry points
+
+Use [English design documents](docs/en/README.md) while implementing and verifying. [Korean documents](docs/ko/README.md) are the public default. [The correspondence index](docs/README.md) maps each pair. Update both versions in the same commit and follow the language/UX rules in AGENTS.md. Korean users determine product language and interaction conventions; English implementation notes do not imply English UI.

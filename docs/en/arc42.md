@@ -1,5 +1,7 @@
 # arc42 — TradeOps Hub
 
+[한국어](../ko/arc42.md) · [English](arc42.md)
+
 ## 1. Introduction and goals
 
 Collect public BIS DPL/EL files reliably, preserve provenance and offer a usable Korean search/download workspace. Quality priorities: correct source/version linkage, safe failure recovery, backend authorization, predictable search and clear operational state. No automatic compliance conclusion.

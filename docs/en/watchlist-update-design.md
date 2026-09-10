@@ -1,5 +1,7 @@
 # BIS collection and search design
 
+[한국어](../ko/watchlist-update-design.md) · [English](watchlist-update-design.md)
+
 The active design is [ADR 0005](adr/0005-bis-sessions-and-provenance.md), [API contract](api-contract.md) and [product scope](product-scope.md).
 
 ```text

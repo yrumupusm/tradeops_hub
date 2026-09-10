@@ -1,5 +1,9 @@
 # ADR 0001: 웹·API 분리와 관계형 데이터 저장
 
+[한국어](0001-web-api-relational-storage.md) · [English](../../en/adr/0001-web-api-relational-storage.md)
+
+> 과거 결정 기록입니다. 현재 BIS 구현은 [ADR 0005](0005-bis-sessions-and-provenance.md)와 [C4](../architecture/c4.md)를 참고하세요. 웹·API 분리 원칙은 유지하지만 당시 세부 구현을 현재 계약으로 해석하지 않습니다.
+
 **상태:** 채택 · **기록일:** 2026-09-08
 
 ## 상황
@@ -24,4 +28,4 @@ H2 테스트 통과만으로 PostgreSQL 호환성을 판단하지 않습니다. 
 
 ## 근거
 
-[C4 컨테이너](../architecture/c4.md#2-컨테이너), [docker-compose.yml](../../docker-compose.yml), [pom.xml](../../backend/pom.xml), [마이그레이션](../../backend/src/main/resources/db/migration).
+[C4 컨테이너](../architecture/c4.md), [docker-compose.yml](../../../docker-compose.yml), [pom.xml](../../../backend/pom.xml), [마이그레이션](../../../backend/src/main/resources/db/migration).
