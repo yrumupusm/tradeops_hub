@@ -36,6 +36,12 @@ LAW_RAG_TIMEOUT_SECONDS defaults to 180, allowed 1–180; connect timeout 5 seco
 
 Start existing RAG with its own server script and existing settings, then Hub with LAW_RAG_BASE_URL. Do not recreate databases, remove volumes/collections, reingest or reindex to connect. Hub has no RAG DB credentials and runs no law migration/vector writes. Hub-only restarts cause no RAG data work. Repositories and volumes stay separate.
 
+### Primary Hub deployment — 2026-09-10
+
+After preview verification, the `feat/law-search` release was applied to Hub web 3000/API 8081 with the existing Hub database, accounts and original-file storage. A database backup was retained under ignored artifacts. The existing administrator logged in, followed the sidebar law-search link and received a real answer with five citations through the same session. Account count (3), BIS rows (8642) and snapshots (2) were unchanged.
+
+The independent RAG process on 8080 was not restarted; its 4112 articles and 4431 vectors were preserved. Its repository was at `2f902ca` (documentation-only changes after the previously tested revision). No RAG source or data changes were made. Git repositories remain separate; deployment does not merge the Hub feature branch into main. The preview ports remain a separate verification environment.
+
 ## Verification
 
 RAG inspected revision: 9c2d67fca773c50eca885a98b0a0b144f4dd742c; untracked output remains untouched. Hub branch feat/law-search is based on 7445fbf. Tested revisions and results are recorded below.

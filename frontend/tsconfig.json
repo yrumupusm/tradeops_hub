@@ -34,7 +34,9 @@
     ".next-law-verify/types/**/*.ts",
     ".next-law-verify/dev/types/**/*.ts",
     ".next-law-reviewed/types/**/*.ts",
-    ".next-law-reviewed/dev/types/**/*.ts"
+    ".next-law-reviewed/dev/types/**/*.ts",
+    ".next-law-primary/types/**/*.ts",
+    ".next-law-primary/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

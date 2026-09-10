@@ -2,6 +2,8 @@
 
 ## Law search integration — feat/law-search
 
+- [x] Apply the verified law-search branch to primary Hub 3000/8081 using existing accounts/DB and original storage. Hub DB backed up; existing administrator login, sidebar navigation and an actual law answer with five citations passed. Accounts (3), BIS rows (8642), snapshots (2), law articles (4112) and vectors (4431) are unchanged; RAG process was not restarted. Repositories remain separate and main was not merged.
+
 - [x] Inspect RAG camelCase contracts and runtime without changing law data, vectors or source repository. RAG revision 9c2d67f; health DB ok, articles 4112, vectors 4431, index stale. Existing untracked output untouched.
 - [x] Implement authenticated allowlisted Hub endpoints, bounded timeouts, response invariants, safe errors and Hub/RAG audit correlation.
 - [x] Add Korean Hub-native question, answer, expandable citations, history and comparison UI with cancellation and duplicate-submit protection.

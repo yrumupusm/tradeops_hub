@@ -11,6 +11,7 @@ frontend/.next/
 frontend/.next-verify/
 frontend/.next-law-verify/
 frontend/.next-law-reviewed/
+frontend/.next-law-primary/
 output/playwright/
 frontend/node_modules/
 *.tsbuildinfo
