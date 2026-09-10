@@ -52,7 +52,7 @@ test("rejects evidence paths outside ignored artifacts", () => {
 
 function runChild(args) {
     return new Promise((resolveResult, reject) => {
-        const child = spawn(process.execPath, ["scripts/runtime-scenarios.mjs", ...args], { cwd: root });
+        const child = spawn(process.execPath, ["scripts/runtime-scenarios.mjs", ...args], { cwd: root, env: {...process.env, VERIFY_LOCAL_PASSWORD:"Fixture-verification-pass"} });
         let output = "";
         child.stdout.on("data", chunk => { output += chunk; });
         child.stderr.on("data", chunk => { output += chunk; });
@@ -68,9 +68,10 @@ test("runtime failure exits nonzero and writes safe failed evidence", async () =
         response.setHeader("X-Correlation-Id", "stub-request-001");
         if (request.url === "/api/v1/auth/login") {
             const body = JSON.parse(Buffer.concat(chunks));
-            response.end(JSON.stringify({ accessToken: "SECRET_STUB_TOKEN", user: { role: body.username.split("@")[0].toUpperCase() } }));
+            response.end(JSON.stringify({ id:1, owner:true }));
         } else if (request.url === "/api/v1/watchlist/runs") response.end('{"totalElements":0}');
-        else if (request.url === "/api/v1/transactions") response.end("[]");
+        else if (request.url === "/api/v1/users") response.end("[{\"id\":1}]");
+        else if(request.url === "/api/v1/auth/csrf") response.end('{"token":"stub-csrf"}');
         else response.end('{"status":"ok","password":"SECRET_RESPONSE_VALUE"}');
     });
     await new Promise(resolveReady => server.listen(0, "127.0.0.1", resolveReady));
@@ -97,7 +98,7 @@ test("runtime refuses existing data before any write", async () => {
         response.setHeader("X-Correlation-Id", "stub-request-001");
         if (request.url === "/api/v1/auth/login") {
             const body = JSON.parse(Buffer.concat(chunks));
-            response.end(JSON.stringify({ accessToken: "local-stub", user: { role: body.username.split("@")[0].toUpperCase() } }));
+            response.end(JSON.stringify({ id:1, owner:true }));
         } else {
             if (request.method === "POST") mutations++;
             response.end('{"totalElements":1}');

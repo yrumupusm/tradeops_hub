@@ -1,118 +1,56 @@
 [
   {
-    "id": "health-and-auth-safe-errors",
-    "description": "Health, anonymous access and failed login expose only safe response fields.",
+    "id": "health-and-session",
     "checks": [
-      "health",
       "health-fields",
       "anonymous-denied",
-      "login-denied",
-      "safe-error-fields"
+      "csrf-required",
+      "owner-session"
     ]
   },
   {
-    "id": "operator-creates-first-watchlist-snapshot",
-    "description": "A fresh source creates four added rows and becomes current.",
+    "id": "account-lifecycle",
     "checks": [
-      "completed",
-      "counts",
-      "current-version",
-      "four-entities"
+      "forced-password-change",
+      "old-session-revoked",
+      "ordinary-user",
+      "owner-only-users",
+      "owner-only-audit",
+      "owner-protected"
     ]
   },
   {
-    "id": "operator-reviews-watchlist-version-diff",
-    "description": "Version B exposes precise counts and field-level differences.",
+    "id": "private-search-history",
     "checks": [
-      "completed",
-      "counts",
-      "change-types",
-      "changed-fields",
-      "current-version"
+      "history-recorded",
+      "history-private",
+      "history-delete-denied",
+      "history-deleted"
     ]
   },
   {
-    "id": "same-payload-is-idempotent",
-    "description": "Repeating B reuses its snapshot and preserves changes and prior run aggregates.",
+    "id": "search-and-source-contract",
     "checks": [
-      "same-snapshot",
-      "idempotent",
-      "changes-unchanged",
-      "prior-counts-immutable"
+      "sources-configured",
+      "pinned-versions",
+      "csv-content-type",
+      "invalid-input",
+      "no-legacy-endpoint"
     ]
   },
   {
-    "id": "failed-source-run-preserves-current-view",
-    "description": "Missing source produces a safe failed run without modifying the current entities or changes.",
+    "id": "account-revocation-and-audit",
     "checks": [
-      "failed",
-      "safe-code",
-      "entities-unchanged",
-      "changes-unchanged",
-      "failure-reviewable"
-    ]
-  },
-  {
-    "id": "viewer-cannot-trigger-watchlist-run",
-    "description": "A viewer can read but cannot mutate the source list.",
-    "checks": [
-      "write-denied",
-      "read-allowed",
-      "run-count-unchanged"
-    ]
-  },
-  {
-    "id": "watchlist-search-filters",
-    "description": "Search, provider/country/status filters and pagination operate on the latest snapshot.",
-    "checks": [
-      "normalized-search",
-      "country",
-      "provider",
-      "status",
-      "pagination",
-      "change-filter"
-    ]
-  },
-  {
-    "id": "transaction-import-and-monthly-summary",
-    "description": "Import mixed fictional rows, reject duplicates, and verify persisted search and monthly totals.",
-    "checks": [
-      "import-counts",
-      "duplicate-file",
-      "all-transactions",
-      "filtered-search",
-      "monthly-totals",
-      "viewer-denied"
-    ]
-  },
-  {
-    "id": "screening-review-authorization",
-    "description": "Operator and admin can record reviews; viewer/anonymous access and invalid bodies are rejected.",
-    "checks": [
-      "operator-allowed",
-      "admin-allowed",
-      "viewer-denied",
-      "anonymous-denied",
-      "null-disposition",
-      "invalid-score"
-    ]
-  },
-  {
-    "id": "invalid-request-contract",
-    "description": "Unknown JSON fields, invalid formats and invalid page parameters return safe errors.",
-    "checks": [
-      "unknown-field",
-      "invalid-format",
-      "invalid-page"
+      "deactivation-revokes",
+      "reset-requires-change",
+      "logout-revokes",
+      "audit-redacted"
     ]
   },
   {
     "id": "console-product-copy",
-    "description": "Served HTML uses Korean navigation and workspace access, retaining the fictional-data indicator.",
     "checks": [
       "web-ready",
-      "workspace-access",
-      "fictional-data",
       "korean-language",
       "product-copy"
     ]

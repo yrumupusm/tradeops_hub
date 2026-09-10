@@ -36,14 +36,16 @@ data, internal names, URLs, credentials, screenshots, or commit history.
 
 ## Safety and privacy
 
-- Do not use real company data, customer names, internal terminology, account
-  information, source URLs, or secrets.
+- Public BIS DPL and Entity List data and official source URLs are authorized
+  for collection and runtime use. Do not copy company-internal data, terminology,
+  account information or secrets. Never commit collected public records or exports.
 - Store configuration only in environment variables. Keep `.env` ignored and
   document variable names in `.env.example`.
 - Log identifiers, row counts, and bounded safe error codes rather than raw
   uploaded rows or full personal information.
-- Do not label the system as a real compliance or sanctions decision engine.
-  It is a fictional workflow demonstration.
+- Do not label the system as a compliance or sanctions decision engine.
+  Identify BIS public source data and its collection time accurately; use fictional
+  records only for reproducible tests.
 
 ## Verification model
 

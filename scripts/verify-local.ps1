@@ -63,11 +63,30 @@ Invoke-Step "Verification tooling tests" {
 if (-not $SkipBackend) {
     Invoke-Step "Backend tests" {
         $maven = Resolve-MavenCommand
+        # This gate is server-free even when invoked from an application shell.
+        $testEnvironment = @{
+            SPRING_DATASOURCE_URL = 'jdbc:h2:mem:tradeops;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE'
+            SPRING_DATASOURCE_USERNAME = 'sa'
+            SPRING_DATASOURCE_PASSWORD = ''
+            TRADEOPS_TEST_PG = 'false'
+            BIS_SCHEDULE_ENABLED = 'false'
+            OWNER_INITIAL_PASSWORD = ''
+        }
+        $previousEnvironment = @{}
+        foreach ($name in $testEnvironment.Keys) {
+            $previousEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+            [Environment]::SetEnvironmentVariable($name, $testEnvironment[$name], 'Process')
+        }
         Push-Location (Join-Path $ProjectRoot "backend")
         try {
             & $maven -q test
             if ($LASTEXITCODE -ne 0) { throw "Backend tests failed with exit code $LASTEXITCODE." }
-        } finally { Pop-Location }
+        } finally {
+            Pop-Location
+            foreach ($name in $previousEnvironment.Keys) {
+                [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process')
+            }
+        }
     }
 }
 

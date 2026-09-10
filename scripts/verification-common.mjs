@@ -42,8 +42,7 @@ function exactKeys(value, keys) {
     if (!value || typeof value !== "object" || Array.isArray(value) ||
         Object.keys(value).sort().join("|") !== [...keys].sort().join("|")) throw new Error("EVIDENCE_SCHEMA_INVALID");
 }
-const endpoints = new Set(["/health", "/auth/login", "/auth/me", "/watchlist/runs", "/watchlist/entities",
-    "/watchlist/changes", "/imports", "/transactions", "/transactions/monthly-summary", "/screening-reviews", "/"]);
+const endpoints = new Set(["/health", "/auth/csrf", "/auth/login", "/auth/me", "/auth/logout", "/account/password", "/users", "/users/:id", "/users/:id/reset-password", "/audit-events", "/watchlist/runs", "/watchlist/sources", "/watchlist/search", "/watchlist/exports", "/search-history", "/search-history/:id", "/transactions", "/"]);
 export function validateEvidence(report, { verificationId, now = Date.now(), expectedSourceHash = sourceHash(),
     expectedScenarioHash = scenarioHash(), scenarios = definitions() }) {
     exactKeys(report, ["schemaVersion", "verificationId", "generatedAt", "sourceHash", "scenarioHash", "status", "scenarios"]);
@@ -65,7 +64,7 @@ export function validateEvidence(report, { verificationId, now = Date.now(), exp
         if (!Array.isArray(actual.requests) || actual.requests.length < 1) throw new Error("EVIDENCE_REQUEST_MISSING");
         for (const request of actual.requests) {
             exactKeys(request, ["method", "path", "status", "correlationId"]);
-            if (!["GET", "POST"].includes(request.method) || !endpoints.has(request.path) ||
+            if (!["GET", "POST", "PATCH", "DELETE"].includes(request.method) || !endpoints.has(request.path) ||
                 !Number.isInteger(request.status) || request.status < 200 || request.status > 499 ||
                 (request.path !== "/" && !/^[A-Za-z0-9-]{8,64}$/.test(request.correlationId)) ||
                 (request.path === "/" && request.correlationId !== null)) throw new Error("EVIDENCE_REQUEST_INVALID");

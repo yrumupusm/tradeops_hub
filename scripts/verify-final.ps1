@@ -94,19 +94,22 @@ try {
     Set-VerificationEnvironment "SPRING_DATASOURCE_URL" "jdbc:postgresql://127.0.0.1:$PostgresPort/tradeops_verify"
     Set-VerificationEnvironment "SPRING_DATASOURCE_USERNAME" "tradeops_verify"
     Set-VerificationEnvironment "SPRING_DATASOURCE_PASSWORD" $password
-    Set-VerificationEnvironment "JWT_SECRET" ([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes([guid]::NewGuid().ToString() + [guid]::NewGuid().ToString())))
-    Set-VerificationEnvironment "JWT_ISSUER" "tradeops-verification"
-    Set-VerificationEnvironment "SEED_DEMO_USERS" "true"
+    Set-VerificationEnvironment "OWNER_USERNAME" "owner@tradeops.test"
+    Set-VerificationEnvironment "OWNER_INITIAL_PASSWORD" $password
+    Set-VerificationEnvironment "VERIFY_OWNER_USERNAME" "owner@tradeops.test"
+    Set-VerificationEnvironment "SESSION_COOKIE_SECURE" "false"
+    Set-VerificationEnvironment "BIS_SCHEDULE_ENABLED" "false"
+    Set-VerificationEnvironment "BIS_STORAGE_PATH" (Join-Path $RunDirectory "source-files")
     Set-VerificationEnvironment "API_PORT" "$ApiPort"
     Set-VerificationEnvironment "SERVER_ADDRESS" "127.0.0.1"
-    Set-VerificationEnvironment "TRADEOPS_WEB_ALLOWED_ORIGIN" "http://127.0.0.1:$WebPort"
-    Set-VerificationEnvironment "NEXT_PUBLIC_API_BASE" "http://127.0.0.1:$ApiPort/api/v1"
-    Set-VerificationEnvironment "VERIFY_LOCAL_PASSWORD" "portfolio-demo"
+    Set-VerificationEnvironment "API_PROXY_TARGET" "http://127.0.0.1:$ApiPort"
+    Set-VerificationEnvironment "NEXT_DIST_DIR" ".next-verify"
+    Set-VerificationEnvironment "VERIFY_LOCAL_PASSWORD" $password
 
     Write-Host "==> Build API and web"
     Push-Location (Join-Path $ProjectRoot "backend")
     try {
-        Invoke-Logged $MavenPath @("-q", "-DskipTests", "package") (Join-Path $RunDirectory "api-build.log") "API_BUILD_FAILED"
+        Invoke-Logged $MavenPath @("-q", "-DskipTests", "-Dartifact.name=tradeops-api-final-$VerificationId", "package") (Join-Path $RunDirectory "api-build.log") "API_BUILD_FAILED"
     } finally { Pop-Location }
     Push-Location (Join-Path $ProjectRoot "frontend")
     try {
@@ -129,8 +132,22 @@ try {
     }
     if (-not $ready) { throw "POSTGRES_START_TIMEOUT" }
 
+    Write-Host "==> PostgreSQL collection, search and performance tests"
+    & docker exec $ContainerId createdb -U tradeops_verify tradeops_fixtures
+    if ($LASTEXITCODE -ne 0) { throw "FIXTURE_DATABASE_FAILED" }
+    Set-VerificationEnvironment "TRADEOPS_TEST_PG" "true"
+    Set-VerificationEnvironment "SPRING_DATASOURCE_URL" "jdbc:postgresql://127.0.0.1:$PostgresPort/tradeops_fixtures"
+    Push-Location (Join-Path $ProjectRoot "backend")
+    try {
+        Invoke-Logged $MavenPath @("-q", "-Dtest=BisPostgresIntegrationTest", "test") (Join-Path $RunDirectory "postgres-tests.log") "POSTGRES_TESTS_FAILED"
+    } finally {
+        Pop-Location
+        Set-VerificationEnvironment "TRADEOPS_TEST_PG" "false"
+        Set-VerificationEnvironment "SPRING_DATASOURCE_URL" "jdbc:postgresql://127.0.0.1:$PostgresPort/tradeops_verify"
+    }
+
     Write-Host "==> Start isolated API and web"
-    $jar = Join-Path $ProjectRoot "backend/target/tradeops-api-0.1.0-SNAPSHOT.jar"
+    $jar = Join-Path $ProjectRoot "backend/target/tradeops-api-final-$VerificationId.jar"
     $ApiProcess = Start-Process -FilePath $java -ArgumentList @("-jar", ('"' + $jar + '"')) -WorkingDirectory $ProjectRoot -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $RunDirectory "api.log") -RedirectStandardError (Join-Path $RunDirectory "api.err.log")
     $next = Join-Path $ProjectRoot "frontend/node_modules/next/dist/bin/next"
     $WebProcess = Start-Process -FilePath $node -ArgumentList @(('"' + $next + '"'), "start", "--hostname", "127.0.0.1", "--port", "$WebPort") -WorkingDirectory (Join-Path $ProjectRoot "frontend") -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $RunDirectory "web.log") -RedirectStandardError (Join-Path $RunDirectory "web.err.log")
@@ -143,9 +160,9 @@ try {
     $Summary.evidencePassed = $true
 
     Write-Host "==> PostgreSQL persistence assertions"
-    $sql = "select (select count(*) from watchlist_snapshots), (select count(*) from watchlist_snapshot_records), (select count(*) from watchlist_changes), (select count(*) from watchlist_source_runs), (select count(*) from import_runs), (select count(*) from trade_transactions), (select count(*) from import_row_rejections), (select count(*) from screening_reviews), (select count(*) from screening_reviews r join audit_events a on a.entity_id=cast(r.id as varchar) and a.correlation_id=r.correlation_id and a.actor_username=r.actor_username and a.entity_type='SCREENING_REVIEW' and a.event_type='SCREENING_REVIEW_RECORDED')"
+    $sql = "select (select count(*) from app_users), (select count(*) from bis_sources), (select count(*) from search_history), (select count(*) from audit_events where event_type='EXPORT_GENERATED')"
     $counts = & docker exec $ContainerId psql -U tradeops_verify -d tradeops_verify -At -c $sql
-    if ($LASTEXITCODE -ne 0 -or ($counts -join "").Trim() -ne "2|8|7|4|1|3|2|2|2") { throw "POSTGRES_PERSISTENCE_ASSERTION_FAILED" }
+    if ($LASTEXITCODE -ne 0 -or ($counts -join "").Trim() -ne "3|2|0|1") { throw "POSTGRES_PERSISTENCE_ASSERTION_FAILED" }
     $Summary.databasePassed = $true
     $Succeeded = $true
     if ($KeepRuntime) {

@@ -1,92 +1,44 @@
-# 실행 및 운영 안내
+# 운영 안내
 
-## 로컬 준비
+## 설정과 시작
 
-Java 17, Maven, Node.js와 npm, Docker Compose를 설치합니다. 루트의 `.env.example`을 `.env`로 복사하고 DB 비밀번호와 JWT 키를 설정합니다. `JWT_SECRET`에는 최소 32바이트 난수의 Base64 값을 사용합니다. 예제 키는 로컬 설정 형식을 보여 주는 공개 값입니다.
+[README](../README.md)의 순서로 PostgreSQL/API/웹을 실행한다. 로컬 API 실행 스크립트만 루트 `.env`를 읽는다. 프런트엔드의 `API_PROXY_TARGET`과 배포 환경 변수는 해당 프로세스에 별도로 전달한다. 환경 변수 목록은 [.env.example](../.env.example)에 있다.
 
-```powershell
-Copy-Item .env.example .env
-docker compose up -d postgres
-.\scripts\start-api-local.ps1 -MavenPath C:\path\to\mvn.cmd
-```
+첫 운영 책임자는 `OWNER_USERNAME`, `OWNER_INITIAL_PASSWORD`로 만든다. 이미 존재하면 비밀번호를 덮어쓰지 않는다. 역할 편집은 없다. 기존 설치에서 JWT는 더 이상 사용하지 않으며 다시 로그인해야 한다. Flyway V1–V4는 수정하지 않고 V5–V8을 추가 적용한다. PostgreSQL 계정은 pg_trgm 확장을 생성할 권한이 필요하다.
 
-시작 스크립트는 루트 `.env`를 프로세스 환경변수로 읽습니다. Maven을 직접 실행할 때는 환경변수를 별도로 설정해야 합니다. 웹은 다른 터미널에서 실행합니다.
+기본 원본 경로는 API 프로세스 기준 상대 경로다. 운영에서는 `BIS_STORAGE_PATH`를 절대 경로의 영속 볼륨으로 지정한다. 웹 공개 주소는 HTTPS로 제공하고 `SESSION_COOKIE_SECURE=true`를 설정한다. API·DB는 필요한 네트워크에서만 접근할 수 있게 둔다.
 
-```powershell
-cd frontend
-npm ci
-npm run dev
-```
+## 첫 수집과 확인
 
-## 설정
+로그인 후 **BIS 자료 수집 → 전체 자료 수집**을 실행한다. DPL/EL의 상태가 각각 완료인지 보고 행 수와 최근 성공 시각을 확인한다. **우려거래자 검색**에서 이름·출처·국가 조건을 적용하고 상세 원문과 원본 파일을 확인한다. CSV는 검색 화면에 표시한 버전 전체 결과를 내려받는다.
 
-| 변수 | 기본값 / 역할 |
+## 정기 실행
+
+기본값은 매주 월요일 09:00, Asia/Seoul이다. 다음 예약은 DB에 남는다. 첫 설치에서는 다음 월요일을 예약하므로 즉시 필요한 데이터는 수동 수집한다. 서버 중단으로 놓친 예약은 재기동 후 한 번 수행한다. 수집 도중 중단된 실행은 PROCESS_INTERRUPTED로 종료하며 기존 현재 목록을 유지한다.
+
+스케줄러는 단일 API 인스턴스만 지원한다. 동일 DB로 API 인스턴스를 여러 개 실행하지 않는다. 예약 비활성화는 `BIS_SCHEDULE_ENABLED=false`다.
+
+## 오류 대응
+
+| 상태 / 오류 | 확인 및 대응 |
 | --- | --- |
-| `POSTGRES_DB`, `POSTGRES_USER` | `tradeops_hub`, `tradeops` |
-| `POSTGRES_PASSWORD` | 로컬에서 설정; Git에 저장하지 않음 |
-| `DB_HOST`, `POSTGRES_PORT` | `localhost`, `5432` |
-| `API_PORT` | `8081` |
-| `JWT_SECRET`, `JWT_ISSUER`, `JWT_EXPIRATION_MINUTES` | 서명 키, 발급자, 토큰 유효 분 |
-| `SEED_DEMO_USERS` | 예제에서 true; API 기본값 false |
-| `NEXT_PUBLIC_API_BASE` | 웹 기본 `http://localhost:8081/api/v1` |
-| `TRADEOPS_WEB_ALLOWED_ORIGIN` | API 기본 `http://localhost:3000` |
-| `WEB_PORT` | 예약 값; 현재 웹 실행 명령에 자동 적용되지 않음 |
-| `FIXTURE_SEED` | 재현용 시드 메타데이터; 갱신 API는 이미 생성한 파일을 읽음 |
+| DOWNLOAD_LINK_MISSING / AMBIGUOUS | 공식 안내 페이지의 문단·링크를 확인하고 discovery 규칙을 수정·테스트한다. |
+| SOURCE_URL_NOT_ALLOWED | 공식 주소인지 직접 확인한 후 필요한 환경 설정만 변경한다. 임의 호스트를 넓게 허용하지 않는다. |
+| SCHEMA_CHANGED / CSV_INVALID | 원본 열과 형식을 확인하고 parser 계약·가상 회귀 테스트를 함께 갱신한다. |
+| ROW_VALIDATION_FAILED | 실행 상세의 오류 행 번호와 원본 파일을 대조한다. 오류를 숨기고 반영하지 않는다. |
+| ROW_COUNT_DROP / HELD | 직전 버전과 추가·제외를 확인한다. 운영 책임자가 올바른 감소로 확인하면 반영한다. |
+| SOURCE_RETRY_LATER / TEMPORARILY_UNAVAILABLE | 잠시 후 수동 재시도한다. 실패 중에는 직전 자료를 계속 조회한다. |
+| COLLECTION_STORAGE_FAILED | 파일 권한·디스크 공간·DB 상태를 확인한다. 원본/DB를 함께 백업한다. |
+| CSRF_INVALID | 로그인 화면에서 다시 인증한다. 만료된 요청을 자동 재실행하지 않는다. |
 
-웹 환경변수는 웹을 실행하는 셸에 설정합니다. 루트 `.env`가 Next.js에 자동 로드되는 구조는 아닙니다. 예를 들어 포트 3001을 사용하려면 API 환경에 `TRADEOPS_WEB_ALLOWED_ORIGIN=http://localhost:3001`을 설정하고 웹을 `npm run dev -- --port 3001`로 실행합니다.
+검증된 공식 다운로드 주소 변경은 자동 반영하고 출처 경고·실행의 이전/신규 주소에 남긴다. 안내 페이지 자체가 공식 도메인 밖으로 이동하면 운영자가 확인 후 설정을 바꿔야 한다.
 
-## 로컬 계정
+## 계정과 감사
 
-`SEED_DEMO_USERS=true`일 때 다음 계정이 없으면 생성됩니다. 이미 존재하는 계정의 비밀번호는 시더가 변경하지 않습니다.
+운영 책임자가 임시 비밀번호로 계정을 만든다. 사용자는 첫 로그인 후 변경한다. 비활성화·초기화·비밀번호 변경은 해당 계정의 모든 세션을 폐기한다. 운영 책임자 자신은 내 계정에서 비밀번호를 변경한다. 감사 이력은 작업·행위자·기간으로 필터링한다. 검색어는 개인 검색 이력에만 남으며 본인이 삭제할 때까지 유지한다.
 
-| 계정 | 역할 |
-| --- | --- |
-| `admin@tradeops.test` | ADMIN |
-| `operator@tradeops.test` | OPERATOR |
-| `viewer@tradeops.test` | VIEWER |
+## 백업과 검증
 
-공통 로컬 비밀번호는 `portfolio-demo`입니다. 현재 웹 로그인 버튼은 이 운영자 계정을 사용합니다. 외부 공개 서비스에 사용할 일반 로그인·계정 운영은 아직 구현되어 있지 않습니다.
+DB와 원본 보관 디렉터리를 함께 백업한다. 복원 검증은 별도 DB/디렉터리에서 수행한다. 원본 자동 삭제 기능은 없다. `storage/`, `artifacts/`, `.env`, 빌드 결과는 Git에 올리지 않는다. 공개 BIS 자료도 저장소 fixture로 사용하지 않는다.
 
-## 기본 확인 순서
-
-1. `GET http://localhost:8081/api/v1/health`의 응답과 `X-Correlation-Id`를 확인합니다. 이 엔드포인트는 API 응답 상태만 나타내며 DB 연결 점검은 아닙니다.
-2. 웹에서 운영자로 로그인합니다.
-3. 깨끗한 DB에서 버전 A/XML을 실행하면 추가 4건, 이어 B/CSV를 실행하면 추가 1·변경 1·삭제 1·유지 2건입니다.
-4. B/CSV를 다시 실행하면 기존 스냅샷을 재사용합니다.
-5. API에서 조회자 계정의 목록 갱신·거래 업로드가 403인지 확인합니다.
-
-목록 화면은 목록·변경·실행 이력만 로드합니다. 거래 집계 API의 장애가 목록 로딩을 막지 않습니다. 소스 실행이 `FAILED`이면 안전한 오류 코드에 대응하는 한국어 안내와 현재 목록 보존 안내를 표시합니다. 알려지지 않은 오류는 공통 안내로 처리하며 서버의 원문 오류를 그대로 표시하지 않습니다.
-
-운영 화면의 메뉴, 버튼, 상태, 오류 안내는 한국어로 표시합니다. 국가·등재 사유와 변경 필드도 한국어로 풀어 쓰며, 변경 전후 값을 함께 표시합니다. 원본 식별자·대상 고유명·버전·파일 형식은 원본 값을 유지합니다. 등록된 데이터가 없으면 다음 작업을 안내하고, 가상 데이터 사용 표시는 작은 화면에서도 유지합니다. API 필드와 저장된 원본 값은 변경하지 않습니다.
-
-## 검증
-
-```powershell
-.\scripts\verify-local.ps1 -MavenPath C:\path\to\mvn.cmd
-cd frontend
-npm run build
-```
-
-로컬 게이트는 Maven 테스트, TypeScript 검사, 증빙 검증기 테스트를 실행합니다. 실제 PostgreSQL을 포함한 최종 검증은 다음 명령으로 실행합니다.
-
-```powershell
-.\scripts\verify-final.ps1 -MavenPath C:\path\to\mvn.cmd
-```
-
-이 명령은 로컬 `.env`를 읽지 않습니다. 임시 DB와 난수 인증 설정을 새로 만들고 15432(DB)·18081(API)·13000(웹) 포트를 사용합니다. 기존 Docker 볼륨을 사용하지 않으며 사용 중인 포트는 덮어쓰지 않고 실패합니다. 포트는 `-PostgresPort`, `-ApiPort`, `-WebPort`로 변경할 수 있습니다. 기본 종료 절차는 생성한 API·웹 프로세스와 임시 컨테이너만 정리합니다.
-
-실행 결과는 `artifacts/final/<실행 ID>/runtime.json`과 `summary.json`, 최근 결과는 `artifacts/final/latest.json`입니다. 원본·시나리오 해시와 모든 검사 항목을 대조하므로 이전 실행의 파일을 새 성공 증빙으로 재사용할 수 없습니다. 상세 로그도 이 폴더에 저장하지만 공개 증빙에는 포함하지 않습니다.
-
-이미 시작한 **빈 검증 DB**가 있다면 다음 명령을 사용할 수 있습니다. 목록 실행이나 거래가 이미 있으면 쓰기 전에 중단합니다.
-
-```powershell
-.\scripts\verify-runtime.ps1 -ApiBase http://127.0.0.1:18081/api/v1 -WebBase http://127.0.0.1:13000
-```
-
-런타임 게이트는 루프백 HTTP 주소만 허용하며, 기본 로컬 시드 계정을 사용합니다. 별도 비밀번호는 실행 셸의 `VERIFY_LOCAL_PASSWORD`로 전달합니다. 헤더·토큰·비밀번호·원본 행은 증빙에 저장하지 않습니다. 기본 게이트의 웹 검사는 HTML 응답을 검사하며 브라우저 조작을 대신하지 않습니다.
-
-브라우저 디버깅이 필요하면 최종 게이트에 `-KeepRuntime`을 지정할 수 있습니다. 성공했을 때만 자원을 유지하며 `runtime-info.json`에 해당 컨테이너·프로세스 ID를 남깁니다. 검토 후 해당 ID의 자원만 종료해야 합니다. 로컬 로그와 생성 결과는 `artifacts/`에 두며 커밋하지 않습니다.
-
-## 종료와 데이터 보존
-
-웹과 API는 실행 터미널에서 Ctrl+C로 종료합니다. DB는 `docker compose stop postgres`로 중지합니다. 기존 볼륨 데이터는 유지됩니다. 볼륨 삭제·초기화는 일반 종료 절차에 포함하지 않습니다.
+[검증 안내](evaluation-harness.md)의 서버 없는 검사, 실제 PostgreSQL 검사, 런타임/브라우저 검사를 구분한다. 원본 이름이나 세션 정보 없이 상태·건수·안전한 오류 코드만 검증 결과에 남긴다.
