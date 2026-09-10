@@ -1,10 +1,16 @@
 # Delivery checklist — BIS workspace
 
+## Local law runtime retirement
+
+- [x] Make the former GitHub repository private and switch law runtime to the monorepo with schema validation. Live counts and snapshot unchanged: 44 laws, 4112 articles, 4431 indexed articles. Existing DB/vector volumes and external Markdown source preserved.
+- [ ] Archive the old checkout: directory move failed because another process holds the folder; subsequent cleanup and preparation of a manual cleanup script were rejected by automatic approval review. No old files removed; no cleanup script created.
+
 ## Monorepo migration
 
 - [x] Import all law-service commits under services/law-search without squashing; preserve original checkout, configuration, DB and embeddings.
 - [x] Update root/service guidance, README, paired architecture/runbook links and isolated verification entry point for one repository with separate processes/storage.
-- [x] Verify tree/history parity, Hub local gate and all 194 law tests, law packaging and existing runtime. Source subtree tree/hash and all 41 original commits preserved; production RAG remains 4112 articles/4431 vectors on the same process. Entrypoint links and existing volume names verified. Original remote/local checkout retained; retirement conditions documented.\n- [x] Publish verified monorepo to main and verify remote revision. All 41 law commits are reachable from origin/main; original remote retained.
+- [x] Verify tree/history parity, Hub local gate and all 194 law tests, law packaging and existing runtime. Source subtree tree/hash and all 41 original commits preserved; production RAG remains 4112 articles/4431 vectors on the same process. Entrypoint links and existing volume names verified. Original remote/local checkout retained; retirement conditions documented.
+- [x] Publish verified monorepo to main and verify remote revision. All 41 law commits are reachable from origin/main; original remote retained.
 
 ## Law search integration — feat/law-search
 

@@ -10,6 +10,8 @@ The original checkout remains intact. Ignored configuration, evidence, law sourc
 
 ## Runtime and verification
 
+On 2026-09-11 the former GitHub repository was made private and the law runtime was restarted from the monorepo package with schema validation. Read-only checks confirmed unchanged 44 laws, 4112 articles, 4431 indexed articles and snapshot metadata. The existing stale index remains unchanged. The Markdown source directory is independent of the old checkout. The old checkout is no longer needed by the law process, but its archive move failed due to a directory lock; automatic approval review rejected further cleanup and cleanup-script preparation. It remains intact on disk.
+
 Root `.env` belongs to Hub; `services/law-search/.env` belongs to law. Preserve datasource URL/driver/credentials/schema mode, providers, source paths and vector collection. Resolve relative source paths against the previous working directory. Existing PostgreSQL data must never use create-drop.
 
 Law Compose pins project name `law-research-assistant-spring`, retaining volumes `law-research-assistant-spring_postgres_data` and `law-research-assistant-spring_qdrant_data`. No volume is recreated or copied during this migration. Hub Compose remains separate. Do not use `down -v`. Source Markdown repositories are data inputs, not application repositories to merge.
