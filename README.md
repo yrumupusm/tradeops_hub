@@ -11,6 +11,24 @@ BIS 우려거래자 자료를 수집하고 이름으로 조회하는 업무 도�
 
 검색 결과는 원본 정보와 이름 유사도를 제공하며 법률·제재 판단을 자동으로 내리지 않습니다.
 
+## 아키텍처
+
+```mermaid
+flowchart LR
+    User["사용자 / 운영 책임자"] --> Web["Next.js 웹 콘솔"]
+    Web -->|"동일 출처 API 프록시 · 세션 쿠키"| API["Spring Boot API"]
+    API --> DB[("PostgreSQL")]
+    API --> Files[("원본 파일 저장소")]
+    API -->|"안내 페이지 확인 · DPL / EL 다운로드"| BIS["BIS 공식 웹사이트"]
+    Scheduler["정기 수집 스케줄러"] --> API
+```
+
+웹 콘솔은 검색·수집·이력 조회를 제공하고, API는 세션 인증과 권한 확인, 수집·검색·CSV 생성을 담당합니다. PostgreSQL에는 계정·세션·감사 이력과 수집 실행·데이터 버전·검색 인덱스를 저장하며, 내려받은 원본 파일은 별도 영속 저장소에 보관합니다.
+
+수집기는 매번 BIS 안내 페이지에서 다운로드 주소를 확인하고 파일 구조와 이름을 검증합니다. 새 데이터 버전은 검증 후 반영하며, 수집 실패나 급격한 건수 감소로 보류된 경우 기존 데이터를 유지합니다. 검색 결과와 CSV는 동일한 데이터 버전을 사용합니다.
+
+스케줄러와 수집 작업은 API 프로세스 안에서 실행합니다. 현재 배포 구성은 Next.js 1개, Spring Boot 1개, PostgreSQL과 원본 파일 저장소입니다.
+
 ## 실행
 
 Java 17, Maven, Node.js 22 이상, Docker가 필요합니다.
@@ -29,6 +47,14 @@ Java 17, Maven, Node.js 22 이상, Docker가 필요합니다.
 
 ## 설계 문서
 
-[제품 범위](docs/product-scope.md) · [API 계약](docs/api-contract.md) · [C4](docs/architecture/c4.md) · [ADR](docs/adr/README.md) · [arc42](docs/arc42.md) · [운영 안내](docs/runbook.md)
+| 문서 | 내용 |
+| --- | --- |
+| [C4 모델](docs/architecture/c4.md) | 시스템 경계, 실행 구성과 API 내부 컴포넌트 |
+| [ADR](docs/adr/README.md) | 주요 설계 결정과 대안, 결과 |
+| [arc42](docs/arc42.md) | 요구사항, 실행 흐름, 배포 구성과 품질 목표 |
+| [제품 범위](docs/product-scope.md) | 구현 기능과 범위 |
+| [API 계약](docs/api-contract.md) | 엔드포인트, 권한과 데이터 계약 |
+| [수집·갱신 설계](docs/watchlist-update-design.md) | 원본 검증, 버전 비교와 반영 정책 |
+| [운영 안내](docs/runbook.md) | 실행, 환경 설정과 운영 절차 |
 
 BIS [공식 안내 페이지](https://www.bis.gov/licensing/guidance-on-end-user-and-end-use-controls-and-us-person-controls)에서 제공하는 공개 파일을 사용합니다. 회사 코드·내부 데이터·계정 정보를 포함하지 않는 독립 구현입니다.
