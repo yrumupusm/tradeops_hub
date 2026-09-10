@@ -96,7 +96,7 @@ function todayString() {
 
 function setLoading(loading) {
   submitButton.disabled = loading || !questionInput.value.trim();
-  submitButton.querySelector("span").textContent = loading ? "조사 중" : "조사 시작";
+  submitButton.querySelector("span").textContent = loading ? "조사 중" : "검색";
 }
 
 function updateCharCount() {
