@@ -26,6 +26,8 @@ const actionDetailSeverity = document.querySelector("#action-detail-severity");
 const actionDetailDescription = document.querySelector("#action-detail-description");
 let reindexEnabled = false;
 let actionItems = [];
+let selectedLawId = null;
+let lawDetailRequest = 0;
 reindexButton.disabled = true;
 
 const searchLogStatusLabels = {
@@ -289,13 +291,18 @@ function renderAgentTraces(response) {
 
 function renderLaws(response) {
   const laws = response.items ?? [];
+  if (!laws.some((law) => String(law.lawId) === selectedLawId)) {
+    selectedLawId = null;
+    lawDetailRequest++;
+    lawDetailArea.innerHTML = "";
+  }
   if (!laws.length) {
     lawListArea.innerHTML = `<p class="muted">조회된 법령이 없습니다.</p>`;
     lawDetailArea.innerHTML = "";
     return;
   }
   lawListArea.innerHTML = laws.map((law) => `
-    <button type="button" class="list-item" data-law-id="${escapeHtml(law.lawId)}">
+    <button type="button" class="list-item" data-law-id="${escapeHtml(law.lawId)}" aria-controls="law-detail" aria-expanded="${String(law.lawId) === selectedLawId}">
       <strong>${escapeHtml(law.title)}</strong>
       <span>${escapeHtml(law.lawType)} · ${escapeHtml(law.lawNumber ?? "-")} · 조문 ${escapeHtml(law.articleCount ?? 0)}건 · 회차 ${escapeHtml(law.revisionCount ?? 0)}건</span>
     </button>
@@ -315,7 +322,7 @@ function renderLawDetail(detail) {
     <div class="revision-summary" id="law-revisions-${escapeHtml(detail.lawId)}">
       <div class="inline-loading">개정 이력을 불러오는 중입니다.</div>
     </div>
-    <div class="article-summary-list">
+    <div class="article-summary-list" tabindex="0" role="region" aria-label="조문 목록">
       ${articles.map((article) => `
         <details>
           <summary>${escapeHtml([article.articleNumber, article.articleTitle].filter(Boolean).join(" "))}</summary>
@@ -428,11 +435,22 @@ async function loadLaws() {
 }
 
 async function loadLawDetail(lawId) {
+  const request = ++lawDetailRequest;
+  selectedLawId = selectedLawId === String(lawId) ? null : String(lawId);
+  lawListArea.querySelectorAll("[data-law-id]").forEach((button) => {
+    button.setAttribute("aria-expanded", String(button.dataset.lawId === selectedLawId));
+  });
+  if (selectedLawId === null) {
+    lawDetailArea.innerHTML = "";
+    return;
+  }
   lawDetailArea.innerHTML = `<div class="inline-loading">법령 상세를 불러오는 중입니다.</div>`;
   try {
     const detail = await fetchJson(`/api/laws/${encodeURIComponent(lawId)}`);
+    if (request !== lawDetailRequest) return;
     renderLawDetail(detail);
   } catch (error) {
+    if (request !== lawDetailRequest) return;
     lawDetailArea.innerHTML = `<div class="error-box small">${escapeHtml(error instanceof Error ? error.message : "법령 상세 조회에 실패했습니다.")}</div>`;
   }
 }

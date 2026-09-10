@@ -904,6 +904,20 @@ tbody tr:last-child td {
     display: grid;
     gap: 8px;
     margin-top: 10px;
+    max-height: min(480px, 55vh);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    align-content: start;
+}
+
+.article-summary-list:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.law-browser-panel .list-item[aria-expanded="true"] {
+    border-color: var(--primary);
+    background: #f8fbff;
 }
 
 .article-summary-list details {
