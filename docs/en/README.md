@@ -20,3 +20,5 @@ English implementation reference. Keep it synchronized with the Korean public do
 
 
 Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.
+
+- [Monorepo](monorepo.md)

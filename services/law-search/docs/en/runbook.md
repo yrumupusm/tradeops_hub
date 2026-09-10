@@ -123,4 +123,4 @@ Confirm a `jdbc:h2:mem:` connection and mock providers in the execution logs. St
 
 ## TradeOps Hub Connection
 
-This repository owns the RAG API and independent screens. Hub owns the user-facing UI and authentication integration. Both repositories may default to the same PostgreSQL host port, so compare actual configuration and preserve separate databases and volumes. Follow the [integration handoff](tradeops-integration-handoff.md) for detailed procedures and authentication boundaries.
+This service directory owns the RAG API and diagnostic screens. The monorepo frontend/backend own the user-facing UI and authentication integration. Hub defaults to PostgreSQL port 5433, law to 5432; actual configuration takes precedence. Preserve separate databases and volumes. See the [monorepo guide](../../../../docs/en/monorepo.md). Root `scripts/verify-monorepo.ps1` supplies isolated test settings automatically. Earlier separate-repository handoff notes are historical.

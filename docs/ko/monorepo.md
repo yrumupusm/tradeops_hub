@@ -1,0 +1,21 @@
+# 모노레포 운영과 이전
+
+[English](../en/monorepo.md)
+
+2026-09-11부터 TradeOps Hub에서 `frontend/`(통합 한국어 화면), `backend/`(Hub 인증·BIS·감사·API 연결), `services/law-search/`(법령 수집·검색·임베딩·답변)를 관리한다. 작업별 브랜치에서 검증하고 main에 합치며 서비스별 영구 브랜치는 만들지 않는다. 프로세스·환경 설정·DB·배포는 계속 분리한다.
+
+법령 main `2f902ca2e2fd73b3b8b1959938eae7716991134b`와 연결된 전체 41개 커밋을 squash 없이 `git subtree add`로 가져왔다. 가져오기 커밋 `b52bf2170a3896a5f49d1a0fdf3a8e6accba111d`는 원래 법령 커밋을 부모로 갖는다. 후속 수정 전 원본과 하위 디렉터리의 트리 해시는 모두 `e93c93d5ec8a9c9cd4f05a957c2af208790c38ab`로 일치했다. 원래 커밋 해시는 유지된다. 과거 커밋은 당시 루트 기준 경로이므로 `git log 2f902ca -- <이전 경로>`로 조회한다.
+
+기존 작업 디렉터리는 보존했다. Git에서 제외한 설정·검증 결과·법령 원문·DB·벡터는 Git으로 가져오지 않는다. 두 저장소의 bundle 백업은 제외 경로인 artifacts에 보관한다. 코드 디렉터리 변경만으로 기존 프로세스를 재시작할 필요는 없다. 다음 실행 전 새 서비스 디렉터리의 설정을 준비하고, 프로세스나 자료 경로가 기존 디렉터리를 참조하는 동안에는 이를 삭제하지 않는다.
+
+## 실행과 검증
+
+루트 `.env`는 Hub용, `services/law-search/.env`는 법령용이다. 기존 DB URL·드라이버·계정·스키마 처리·제공자·자료 경로·벡터 컬렉션을 유지한다. 상대 자료 경로는 이전 작업 디렉터리를 기준으로 절대 경로를 확인한다. 기존 PostgreSQL 데이터에 create-drop을 사용하지 않는다.
+
+법령 Compose 프로젝트 이름을 `law-research-assistant-spring`으로 고정하여 `law-research-assistant-spring_postgres_data`, `law-research-assistant-spring_qdrant_data` 볼륨을 유지한다. 이번 이전에서는 볼륨을 재생성하거나 복사하지 않는다. Hub Compose는 별도이며 `down -v`를 사용하지 않는다. 법령 Markdown 저장소는 데이터 입력이므로 애플리케이션 저장소와 합치지 않는다.
+
+루트의 `scripts/verify-monorepo.ps1 -MavenPath <mvn.cmd>`를 실행한다. Hub 검사, 법령 JavaScript 문법 검사, 임시 H2·mock·inmemory를 명시한 법령 전체 Maven 검사를 실행하며 로컬 `.env`는 읽지 않는다. 실제 PostgreSQL·제공자 검사는 별도다. 법령 문서와 스크립트의 상대 경로는 `services/law-search/` 기준이다. 과거 저장소 분리 인계 문서보다 이 문서가 우선한다.
+
+## 기존 GitHub 저장소 정리
+
+이전을 원격에 푸시하고 이력을 검증하면 기존 원격 저장소는 애플리케이션 소스 이력을 위해 반드시 필요하지는 않다. 이번 작업에서는 삭제하지 않는다. 먼저 이전 안내와 함께 보관 처리하는 편을 권장한다. 이슈·PR 대화·릴리스 첨부파일·Actions 결과·시크릿·브랜치 보호·스타·별도 wiki 이력·배포 설정은 Git 통합으로 이전되지 않는다. 필요한 내용을 보존하고 외부 링크를 수정한 뒤 삭제를 결정한다. 원격 삭제가 로컬 DB 볼륨을 지우지는 않지만 기존 로컬 디렉터리를 삭제하면 프로세스·설정·자료 경로가 깨질 수 있으므로 별도로 판단한다.

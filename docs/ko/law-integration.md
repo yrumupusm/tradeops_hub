@@ -1,5 +1,7 @@
 # 법령 검색 통합
 
+현재 저장소 기준: 2026-09-11부터 법령 서비스는 이 모노레포의 `services/law-search/`에서 관리한다. 실행·데이터는 분리한다. 아래의 두 저장소 설명은 이전 통합 기록이며 현재 Git 운영은 [모노레포 기준](monorepo.md)이 우선한다.
+
 [한국어](law-integration.md) · [English](../en/law-integration.md)
 
 ## 책임 경계와 API

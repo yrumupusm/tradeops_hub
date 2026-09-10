@@ -36,4 +36,4 @@ Use [English design documents](docs/en/README.md) while implementing and verifyi
 
 ## Law search boundary
 
-The separate law RAG repository owns law data, embeddings and answer generation. Hub uses authenticated allowlisted HTTP calls for questions and article history/diff. See [integration](docs/en/law-integration.md). Owner-only administration uses an explicit endpoint allowlist. Data-changing actions run only after an explicit UI confirmation against RAG server configuration; connecting or deploying never ingests or reindexes.
+The law service in `services/law-search/` owns law data, embeddings and answer generation within this monorepo. Hub uses authenticated allowlisted HTTP calls for questions and article history/diff. See [repository boundaries](docs/en/monorepo.md) and [integration](docs/en/law-integration.md). Owner-only administration uses an explicit endpoint allowlist. Data-changing actions run only after an explicit UI confirmation against RAG server configuration; connecting or deploying never ingests or reindexes.

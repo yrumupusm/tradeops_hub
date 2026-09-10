@@ -123,4 +123,4 @@ Qdrant·Cohere 필수 조건과 단계별 실행은 [실행 준비 점검](runti
 
 ## TradeOps Hub 연결
 
-현재 저장소는 RAG API와 독립 화면을 담당합니다. 사용자 화면과 인증 연동은 Hub에서 관리합니다. 두 저장소의 기본 PostgreSQL 호스트 포트가 같을 수 있으므로 실제 설정을 비교하고 DB·볼륨을 분리해 보존합니다. 상세 절차와 인증 경계는 [연동 인계 문서](tradeops-integration-handoff.md)를 따릅니다.
+이 서비스 디렉터리는 RAG API와 점검 화면을 담당합니다. 모노레포의 frontend/backend는 사용자 화면과 인증을 담당합니다. Hub PostgreSQL 기본 포트는 5433, 법령은 5432이며 실제 설정을 우선합니다. DB·볼륨은 분리해 유지합니다. [모노레포 안내](../../../../docs/ko/monorepo.md)를 참고하세요. 루트 `scripts/verify-monorepo.ps1`은 격리된 테스트 설정을 자동 적용합니다. 과거 저장소 분리 인계 문서는 이전 기록입니다.

@@ -11,7 +11,7 @@
 
 검색 대상은 무역안보 관련 8개 핵심 법령과 수집된 하위 법령입니다. 대한민국 전체 법령을 실시간으로 조회하는 서비스가 아니며, 답변은 최종 법률 판단을 대신하지 않습니다.
 
-[TradeOps Hub](https://github.com/yrumupusm/tradeops_hub)와는 저장소를 분리해 연동합니다. Hub는 사용자 화면과 인증을, 이 프로젝트는 법령 데이터와 검색·답변을 담당합니다. 연결 계약과 작업 범위는 [연동 인계 문서](docs/ko/tradeops-integration-handoff.md)에 정리했습니다.
+[TradeOps Hub 모노레포](../../README.md)의 `services/law-search/`에서 관리합니다. 사용자 화면과 인증은 루트의 frontend/backend가, 이 서비스는 법령 데이터와 검색·답변을 담당합니다. [통합 운영 기준](../../docs/ko/monorepo.md)이 과거 저장소 분리 인계 문서보다 우선합니다. 아래 명령은 이 서비스 디렉터리 기준입니다.
 
 ## 실행
 

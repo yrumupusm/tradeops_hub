@@ -1,5 +1,7 @@
 # TradeOps Hub 법령 검색 연동 인계
 
+과거 인계 기록: 2026-09-11 애플리케이션 저장소를 통합했다. 저장소 분리 지침은 [모노레포 안내](../../../../docs/ko/monorepo.md)로 대체하며 API·데이터 경계는 유지한다.
+
 [한국어](../ko/tradeops-integration-handoff.md) | [English](../en/tradeops-integration-handoff.md)
 
 작성일: 2026-09-10. 이 문서는 통합 구현을 위한 인계이며, 통합이 완료됐다는 보고가 아니다.

@@ -1,5 +1,7 @@
 # Law search integration
 
+Current repository policy: since 2026-09-11 the law service lives in `services/law-search/` in this monorepo. Runtime/data remain separate. Earlier two-repository statements below describe historical integration; [monorepo ownership](monorepo.md) supersedes that Git policy.
+
 [한국어](../ko/law-integration.md) · [English](law-integration.md)
 
 ## Boundary and API

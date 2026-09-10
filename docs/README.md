@@ -20,3 +20,5 @@
 | ADR 0004 | [한국어](ko/adr/0004-authorization-and-traceability.md) | [English](en/adr/0004-authorization-and-traceability.md) |
 | ADR 0005 | [한국어](ko/adr/0005-bis-sessions-and-provenance.md) | [English](en/adr/0005-bis-sessions-and-provenance.md) |
 | 법령 검색 통합 | [한국어](ko/law-integration.md) | [English](en/law-integration.md) |
+
+| 모노레포 운영 | [한국어](ko/monorepo.md) | [English](en/monorepo.md) |

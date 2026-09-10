@@ -2,9 +2,9 @@
 
 ## Monorepo migration
 
-- [ ] Import all law-service commits under services/law-search without squashing; preserve original checkout, configuration, DB and embeddings.
-- [ ] Update root/service guidance, README, paired architecture/runbook links and isolated verification entry point for one repository with separate processes/storage.
-- [ ] Verify tree/history parity, both service test suites, build and existing runtime; publish integrated repository and document old-repository retirement conditions.
+- [x] Import all law-service commits under services/law-search without squashing; preserve original checkout, configuration, DB and embeddings.
+- [x] Update root/service guidance, README, paired architecture/runbook links and isolated verification entry point for one repository with separate processes/storage.
+- [x] Verify tree/history parity, Hub local gate and all 194 law tests, law packaging and existing runtime. Source subtree tree/hash and all 41 original commits preserved; production RAG remains 4112 articles/4431 vectors on the same process. Entrypoint links and existing volume names verified. Original remote/local checkout retained; retirement conditions documented.\n- [ ] Publish verified monorepo to main and verify remote revision.
 
 ## Law search integration — feat/law-search
 

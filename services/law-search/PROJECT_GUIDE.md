@@ -1,5 +1,7 @@
 # Project Guide
 
+This service lives in `services/law-search/` of the TradeOps Hub monorepo. Use the root [monorepo guide](../../docs/en/monorepo.md) for Git ownership and combined verification. All service-relative commands below run from this directory. Runtime configuration and databases remain separate from Hub.
+
 ## Documentation Entry Points
 
 - [Korean public documentation](docs/ko/README.md)

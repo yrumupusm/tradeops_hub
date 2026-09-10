@@ -2,6 +2,8 @@
 
 ## Project Role
 
+This directory is now part of the TradeOps Hub monorepo. All Git commits/branches/remotes are managed at the monorepo root. Paths in this document are relative to `services/law-search/`; run service tests from this directory. The root `AGENTS.md` and `docs/en/monorepo.md` define current repository ownership. Historical instructions to keep application repositories separate no longer apply. The law process, PostgreSQL and vector storage remain independent.
+
 This repository is a Spring Boot law research assistant. Treat its agents as a role-based application pipeline, not as a fully autonomous multi-agent system.
 
 Core runtime flow:

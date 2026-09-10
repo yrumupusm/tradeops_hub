@@ -2,6 +2,8 @@
 
 ## Purpose
 
+This is a monorepo. `frontend/` owns the integrated Korean UI, `backend/` owns Hub authentication/BIS/API mediation, and `services/law-search/` owns law ingestion/RAG. Use one Git history and short-lived task branches; service directories are not separate repositories. Nested law instructions remain applicable to law code. Older separate-repository handoff documents are historical and superseded by `docs/en/monorepo.md`. Keep runtime processes, configuration, databases and vectors separate. Never recreate existing volumes to reorganize source code.
+
 TradeOps Hub is an independently implemented application for internal
 trade-data operations. It must not contain copied company source code, company
 data, internal names, URLs, credentials, screenshots, or commit history.

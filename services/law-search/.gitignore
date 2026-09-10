@@ -10,3 +10,7 @@ devlegalize-kr/
 *.db
 *.mv.db
 *.trace.db
+output/
+artifacts/
+.env.*
+!.env.example

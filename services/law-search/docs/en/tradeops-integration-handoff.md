@@ -1,5 +1,7 @@
 # TradeOps Hub Law Search Integration Handoff
 
+Historical handoff: application repositories were merged on 2026-09-11. The [monorepo guide](../../../../docs/en/monorepo.md) supersedes repository separation; API/data boundaries still apply.
+
 [한국어](../ko/tradeops-integration-handoff.md) | [English](../en/tradeops-integration-handoff.md)
 
 Written on 2026-09-10. This is an implementation handoff, not a report that integration is complete.
