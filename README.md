@@ -191,6 +191,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\infra.ps1 down
 
 ## 주요 API
 
+TradeOps Hub에 법령 검색을 연결하는 작업은 [연동 인계 문서](docs/tradeops-integration-handoff.md)를 참고하세요. 저장소를 분리한 채 Hub UI·인증을 통해 기존 RAG API를 사용하는 구성과 검증 범위를 정리했습니다.
+
 기존 UI용 `/api/...` 경로와 원본 프로젝트 호환용 `/api/v1/...` 경로를 함께 지원합니다.
 
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
