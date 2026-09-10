@@ -38,8 +38,17 @@ Start existing RAG with its own server script and existing settings, then Hub wi
 
 ## Verification
 
-RAG inspected revision: 9c2d67fca773c50eca885a98b0a0b144f4dd742c; untracked output remains untouched. Hub branch feat/law-search is based on 7445fbf. Final tested revisions and results are recorded after runtime verification.
+RAG inspected revision: 9c2d67fca773c50eca885a98b0a0b144f4dd742c; untracked output remains untouched. Hub branch feat/law-search is based on 7445fbf. Tested revisions and results are recorded below.
 
-Initial read-only health: DB ok, articles 4112, indexed 4431, unindexed 0, index stale, overall degraded. This is not full readiness or an automatic reindex instruction. Compare counts after checks.
+Initial and post-verification read-only health: DB ok, articles 4112, indexed 4431, unindexed 0, index stale, overall degraded. Counts were unchanged; no data/index operation was performed. This is not full RAG readiness or an automatic reindex instruction.
 
 LawIntegrationTest covers input, states, citations, projection, trace correlation, history/diff and session/CSRF/forced-change/deactivation. LawClientTest uses a controlled HTTP server for headers, redirects, malformed JSON, deadline and no retries. Browser and small real-provider checks supplement these; builds alone are not acceptance. Existing BIS regression remains in the local gate.
+
+### Verified on 2026-09-10
+
+- Hub implementation `09e5fb6`, final UI correction `fedf83e`; RAG `9c2d67fca773c50eca885a98b0a0b144f4dd742c`. Separate preview web 3001/API 18083 used the isolated Hub verification database and the existing RAG on 8080. Primary Hub 3000/8081 was not replaced. RAG source remained unchanged.
+- 13 integration cases and 2 HTTP client cases passed, as did the full local gate and production builds. Final CSS passed the frontend local gate and production build.
+- Three actual questions (tank export with defense, strategic export with strategic goods, general export with no area) each returned HTTP 200 / OK / five citations. Hub audit IDs matched RAG request IDs, search logs and the four expected trace stages for all three.
+- Browser checks passed for real citation expansion, two history entries, prior comparison, keyboard expansion, loading/duplicate-submit protection, controlled OK/LOW_CONFIDENCE/INSUFFICIENT_INFO/FAILED states and unavailable/timeout/invalid-response notices. Inputs survive failures; navigation discards delayed replies and watchlist navigation remains usable. HTML-looking article text remains text; absent prior IDs disable comparison.
+- Final served build was inspected at widths 1440, 768 and 390 without horizontal overflow. Login and logout/session denial were checked. Evidence and screenshots remain ignored under artifacts and output/playwright.
+- Existing RAG quality follow-up: the defense question (RAG request `17d23ff3-7736-4d41-a8aa-8e4491d49aaf`) exposed a historical interval starting 2026-07-01 and ending 2026-06-30 for the cited enforcement-decree article. Hub preserves the supplied dates; investigate in RAG rather than editing source data or inventing a correction in UI. Existing stale vector count also remains a RAG follow-up.
