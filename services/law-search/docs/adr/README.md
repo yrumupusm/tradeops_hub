@@ -1,0 +1,8 @@
+# 문서 이동 / Document moved
+
+이 문서의 본문은 한·영 문서로 분리했습니다. 아래 경로에서 최신 내용을 확인하세요.
+
+This document is now maintained as a Korean/English pair. Use the links below for the current content.
+
+- [한국어](../ko/adr/README.md)
+- [English](../en/adr/README.md)

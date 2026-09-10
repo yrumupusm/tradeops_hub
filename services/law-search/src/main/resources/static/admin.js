@@ -1,0 +1,598 @@
+const statusArea = document.querySelector("#admin-status");
+const refreshButton = document.querySelector("#refresh-button");
+const providerSmokeButton = document.querySelector("#provider-smoke-button");
+const providerSmokeResult = document.querySelector("#provider-smoke-result");
+const reindexButton = document.querySelector("#reindex-button");
+const reindexResult = document.querySelector("#reindex-result");
+const sourceRepoUrlInput = document.querySelector("#source-repo-url");
+const sourceLocalDirInput = document.querySelector("#source-local-dir");
+const sourceBranchInput = document.querySelector("#source-branch");
+const syncSourceButton = document.querySelector("#sync-source-button");
+const syncSourceResult = document.querySelector("#sync-source-result");
+const sourceDirInput = document.querySelector("#source-dir");
+const ingestButton = document.querySelector("#ingest-button");
+const ingestResult = document.querySelector("#ingest-result");
+const ingestionRunsArea = document.querySelector("#ingestion-runs");
+const searchLogsArea = document.querySelector("#search-logs");
+const agentTracesArea = document.querySelector("#agent-traces");
+const traceRequestIdInput = document.querySelector("#trace-request-id");
+const clearTraceFilterButton = document.querySelector("#clear-trace-filter");
+const lawKeywordInput = document.querySelector("#law-keyword");
+const lawListArea = document.querySelector("#law-list");
+const lawDetailArea = document.querySelector("#law-detail");
+const actionDetailDialog = document.querySelector("#action-detail-dialog");
+const actionDetailTitle = document.querySelector("#action-detail-title");
+const actionDetailSeverity = document.querySelector("#action-detail-severity");
+const actionDetailDescription = document.querySelector("#action-detail-description");
+let reindexEnabled = false;
+let actionItems = [];
+let selectedLawId = null;
+let lawDetailRequest = 0;
+reindexButton.disabled = true;
+
+const searchLogStatusLabels = {
+  OK: "정상",
+  LOW_CONFIDENCE: "확인 필요",
+  INSUFFICIENT_INFO: "정보 부족",
+  FAILED: "실패",
+};
+
+const searchLogQuestionTypeLabels = {
+  EXPLORATORY: "탐색형",
+  CONFIRMATORY: "확인형",
+  INSUFFICIENT: "정보 부족",
+  REVISION_COMPARE: "개정 비교",
+  METADATA: "정보 확인",
+};
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+  try {
+    return new Intl.DateTimeFormat("ko-KR", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+function shortText(value, max = 72) {
+  const text = String(value ?? "-");
+  return text.length > max ? `${text.slice(0, max)}...` : text;
+}
+
+function searchLogStatusLabel(value) {
+  return searchLogStatusLabels[value] ?? value ?? "-";
+}
+
+function searchLogQuestionTypeLabel(value) {
+  return searchLogQuestionTypeLabels[value] ?? value ?? "-";
+}
+
+async function fetchJson(url, options) {
+  const response = await fetch(url, options);
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(text || `요청 실패 (${response.status})`);
+  }
+  return text ? JSON.parse(text) : {};
+}
+
+function renderStatus(status) {
+  const syncState = status.syncState;
+  const cards = [
+    ["색인 상태", status.indexStatus],
+    ["법령", `${status.lawsCount}건`],
+    ["조문", `${status.articlesCount}건`],
+    ["색인 조문", `${status.indexedArticlesCount ?? 0}건`],
+    ["미색인 조문", `${status.unindexedArticlesCount ?? 0}건`],
+    ["검색 로그", `${status.searchLogCount}건`],
+    ["스냅샷", status.lastSnapshotVersion ?? "-"],
+    ["색인 시각", formatDateTime(status.lastIndexedAt)],
+    ["동기화 commit", syncState?.lastSyncedCommitSha ? shortText(syncState.lastSyncedCommitSha, 12) : "-"],
+    ["동기화 시각", formatDateTime(syncState?.lastSyncAt)],
+    ["이력 충돌 감지", formatDateTime(syncState?.lastForcePushDetectedAt)],
+  ];
+  statusArea.innerHTML = cards.map(([label, value]) => `
+    <div class="metric-card">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </div>
+  `).join("") + renderRecommendedAction(status);
+  updateReindexControl(Boolean(status.reindexEnabled));
+}
+
+function renderRecommendedAction(status) {
+  actionItems = buildRecommendedActions(status);
+  return `
+    <aside class="metric-card action-card" aria-label="조치 안내" aria-live="polite">
+      <span>조치 안내</span>
+      <div class="action-list">
+        ${actionItems.map((action, index) => `
+          <button type="button" class="action-detail-button" data-action-detail-index="${index}"
+              aria-label="${escapeHtml(`${action.label}: ${action.title}. 상세 보기`)}">
+            <span class="action-dot action-dot-${action.severity}" aria-hidden="true"></span>
+            <span>${escapeHtml(action.title)}</span>
+          </button>
+        `).join("")}
+      </div>
+    </aside>
+  `;
+}
+
+function buildRecommendedActions(status) {
+  const actions = [];
+  const failedRuns = status.recentFailures?.length ?? 0;
+  if (failedRuns > 0) {
+    actions.push({
+      severity: "urgent",
+      label: "긴급",
+      title: "최근 수집 실패를 확인하세요.",
+      description: `최근 실패한 수집 작업 ${failedRuns}건의 원인을 확인하고 다시 처리해야 합니다.`,
+    });
+  }
+
+  if (status.indexStatus === "missing") {
+    actions.push({
+      severity: "urgent",
+      label: "긴급",
+      title: "검색 색인이 준비되지 않았습니다.",
+      description: "현재 조문을 검색할 수 없으므로 수집 및 색인 작업이 필요합니다.",
+    });
+  } else if (status.indexStatus === "stale") {
+    const stored = Number(status.articlesCount ?? 0);
+    const indexed = Number(status.indexedArticlesCount ?? 0);
+    const difference = Math.abs(indexed - stored);
+    const direction = indexed > stored ? "남는 색인" : "미색인 조문";
+    actions.push({
+      severity: "check",
+      label: "확인 필요",
+      title: "색인 정리가 필요합니다.",
+      description: `저장된 조문과 색인 조문 수가 ${difference}건 차이입니다. ${direction}을 다음 점검 때 정리하세요.`,
+    });
+  }
+
+  if (status.syncState?.lastForcePushDetectedAt) {
+    actions.push({
+      severity: "check",
+      label: "확인 필요",
+      title: "원본 이력 변경을 확인하세요.",
+      description: "동기화 원본의 이력이 변경된 기록이 있어 다음 수집 전에 변경 내용을 확인하세요.",
+    });
+  }
+
+  return actions.length ? actions : [{
+    severity: "info",
+    label: "참고",
+    title: "즉시 필요한 조치가 없습니다.",
+    description: "색인과 저장된 조문 수가 일치합니다. 정기적으로 수집 상태를 확인하세요.",
+  }];
+}
+
+function showActionDetails(action) {
+  actionDetailTitle.textContent = action.title;
+  actionDetailSeverity.textContent = action.label;
+  actionDetailSeverity.className = `action-severity action-severity-${action.severity}`;
+  actionDetailDescription.textContent = action.description;
+  if (typeof actionDetailDialog.showModal === "function") {
+    actionDetailDialog.showModal();
+  } else {
+    actionDetailDialog.setAttribute("open", "");
+  }
+}
+
+function updateReindexControl(enabled) {
+  reindexEnabled = enabled;
+  reindexButton.disabled = !enabled;
+  if (!enabled) {
+    reindexResult.textContent = "재색인은 비활성화되어 있습니다. ADMIN_REINDEX_ENABLED=true 설정 후 사용할 수 있습니다.";
+  } else if (!reindexResult.textContent || reindexResult.textContent.includes("ADMIN_REINDEX_ENABLED")) {
+    reindexResult.textContent = "실행 대기 중입니다.";
+  }
+}
+
+function renderIngestionRuns(response) {
+  const rows = response.items ?? [];
+  if (!rows.length) {
+    ingestionRunsArea.innerHTML = `<p class="muted">재색인 실행 이력이 없습니다.</p>`;
+    return;
+  }
+  ingestionRunsArea.innerHTML = `
+    <table>
+      <thead><tr><th>ID</th><th>상태</th><th>처리</th><th>실패</th><th>스냅샷</th><th>시작</th><th>종료</th></tr></thead>
+      <tbody>
+        ${rows.map((row) => `
+          <tr>
+            <td>${escapeHtml(row.ingestionRunId)}</td>
+            <td>${escapeHtml(row.status)}</td>
+            <td>${escapeHtml(row.filesProcessed ?? 0)}건</td>
+            <td>${escapeHtml(row.filesFailed ?? 0)}건</td>
+            <td>${escapeHtml(row.snapshotVersion ?? "-")}</td>
+            <td>${escapeHtml(formatDateTime(row.startedAt))}</td>
+            <td>${escapeHtml(formatDateTime(row.finishedAt))}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderSearchLogs(response) {
+  const rows = response.items ?? [];
+  if (!rows.length) {
+    searchLogsArea.innerHTML = `<p class="muted">검색 로그가 없습니다.</p>`;
+    return;
+  }
+  searchLogsArea.innerHTML = `
+    <table class="search-log-table">
+      <thead><tr><th>시간</th><th>요청</th><th>상태</th><th>기준일</th><th>질문</th><th>인용</th><th>질문 분류</th></tr></thead>
+      <tbody>
+        ${rows.map((row) => `
+          <tr>
+            <td>${escapeHtml(formatDateTime(row.createdAt))}</td>
+            <td>
+              <button type="button" class="trace-link" data-trace-request-id="${escapeHtml(row.requestId)}">
+                ${escapeHtml(shortText(row.requestId, 8))}
+              </button>
+            </td>
+            <td>${escapeHtml(searchLogStatusLabel(row.status))}</td>
+            <td>${escapeHtml(row.asOf ?? "현재")}</td>
+            <td class="search-log-question" title="${escapeHtml(row.questionPreview ?? "")}"><span>${escapeHtml(shortText(row.questionPreview))}</span></td>
+            <td>${escapeHtml(row.citedArticleCount ?? 0)}건</td>
+            <td>${escapeHtml(searchLogQuestionTypeLabel(row.questionType))}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  searchLogsArea.querySelectorAll("[data-trace-request-id]").forEach((button) => {
+    button.addEventListener("click", () => loadAgentTraces(button.dataset.traceRequestId ?? ""));
+  });
+}
+
+function renderAgentTraces(response) {
+  const rows = response.items ?? [];
+  const filterLabel = response.filteredRequestId
+    ? `<p class="muted trace-filter-state">요청 ID ${escapeHtml(shortText(response.filteredRequestId, 18))} 기준으로 표시 중입니다.</p>`
+    : "";
+  if (!rows.length) {
+    agentTracesArea.innerHTML = `${filterLabel}<p class="muted">에이전트 추적 이력이 없습니다.</p>`;
+    return;
+  }
+  agentTracesArea.innerHTML = `
+    ${filterLabel}
+    <table>
+      <thead><tr><th>시간</th><th>요청</th><th>단계</th><th>상태</th><th>처리</th><th>출력</th></tr></thead>
+      <tbody>
+        ${rows.slice(0, 20).map((row) => `
+          <tr>
+            <td>${escapeHtml(formatDateTime(row.createdAt))}</td>
+            <td>${escapeHtml(shortText(row.requestId, 8))}</td>
+            <td>${escapeHtml(row.stepName)}</td>
+            <td>${escapeHtml(row.status)}</td>
+            <td>${escapeHtml(row.latencyMs ?? 0)}ms</td>
+            <td>${escapeHtml(shortText(row.outputSummary))}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderLaws(response) {
+  const laws = response.items ?? [];
+  if (!laws.some((law) => String(law.lawId) === selectedLawId)) {
+    selectedLawId = null;
+    lawDetailRequest++;
+    lawDetailArea.innerHTML = "";
+  }
+  if (!laws.length) {
+    lawListArea.innerHTML = `<p class="muted">조회된 법령이 없습니다.</p>`;
+    lawDetailArea.innerHTML = "";
+    return;
+  }
+  lawListArea.innerHTML = laws.map((law) => `
+    <button type="button" class="list-item" data-law-id="${escapeHtml(law.lawId)}" aria-controls="law-detail" aria-expanded="${String(law.lawId) === selectedLawId}">
+      <strong>${escapeHtml(law.title)}</strong>
+      <span>${escapeHtml(law.lawType)} · ${escapeHtml(law.lawNumber ?? "-")} · 조문 ${escapeHtml(law.articleCount ?? 0)}건 · 회차 ${escapeHtml(law.revisionCount ?? 0)}건</span>
+    </button>
+  `).join("");
+  document.querySelectorAll("[data-law-id]").forEach((button) => {
+    button.addEventListener("click", () => loadLawDetail(button.dataset.lawId));
+  });
+}
+
+function renderLawDetail(detail) {
+  const articles = detail.articles ?? [];
+  lawDetailArea.innerHTML = `
+    <div class="detail-title">
+      <strong>${escapeHtml(detail.title)}</strong>
+      <span>${escapeHtml(detail.snapshotVersion ?? "-")}</span>
+    </div>
+    <div class="revision-summary" id="law-revisions-${escapeHtml(detail.lawId)}">
+      <div class="inline-loading">개정 이력을 불러오는 중입니다.</div>
+    </div>
+    <div class="article-summary-list" tabindex="0" role="region" aria-label="조문 목록">
+      ${articles.map((article) => `
+        <details>
+          <summary>${escapeHtml([article.articleNumber, article.articleTitle].filter(Boolean).join(" "))}</summary>
+          <pre>${escapeHtml(article.content)}</pre>
+        </details>
+      `).join("")}
+    </div>
+  `;
+  loadLawRevisions(detail.lawId);
+}
+
+function renderLawRevisions(response) {
+  const rows = response.revisions ?? [];
+  if (!rows.length) {
+    return `<p class="muted">법령 단위 개정 이력이 없습니다.</p>`;
+  }
+  return `
+    <div class="history-box">
+      <strong>법령 단위 개정 이력 ${rows.length}건</strong>
+      <table>
+        <thead><tr><th>시행일</th><th>개정구분</th><th>조문 수</th></tr></thead>
+        <tbody>
+          ${rows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.effectiveFrom ?? "-")}</td>
+              <td>${escapeHtml(row.amendmentKind ?? "-")}</td>
+              <td>${escapeHtml(row.articleCount ?? 0)}건</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderProviderSmoke(response) {
+  const rows = [
+    ["LLM", response.llmProvider, formatProviderResult(response.llmStatus, response.llmError)],
+    ["임베딩", response.embeddingProvider, `${response.embeddingStatus} · ${response.embeddingDimensions}차원`],
+    ["재정렬", response.rerankerProvider, `${response.rerankerStatus} · ${response.rerankedCount}건 · top ${response.topRerankedId ?? "-"}`],
+  ];
+  if (response.embeddingStatus === "failed") {
+    rows[1][2] = `${rows[1][2]} · ${response.embeddingError ?? "embedding_provider_failed"}`;
+  }
+  if (response.rerankerStatus === "failed") {
+    rows[2][2] = `${rows[2][2]} · ${response.rerankerError ?? "reranker_provider_failed"}`;
+  }
+  const hasFailure = rows.some(([, , result]) => result.includes("failed"));
+  providerSmokeResult.className = hasFailure ? "provider-status warning-box small" : "provider-status";
+  providerSmokeResult.innerHTML = `
+    <table>
+      <thead><tr><th>구분</th><th>Provider</th><th>결과</th></tr></thead>
+      <tbody>
+        ${rows.map(([label, provider, result]) => `
+          <tr>
+            <td>${escapeHtml(label)}</td>
+            <td>${escapeHtml(provider)}</td>
+            <td>${escapeHtml(result)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function formatProviderResult(status, errorCode, detail = "") {
+  const suffix = detail ? ` · ${detail}` : "";
+  if (status === "failed") {
+    return `${status}${suffix} · ${errorCode ?? "provider_failed"}`;
+  }
+  return `${status}${suffix}`;
+}
+
+function formatFailureSuffix(response) {
+  const failed = response.failedArticles ?? response.filesFailed ?? 0;
+  const message = response.errorMessage ? ` 사유: ${response.errorMessage}` : "";
+  return failed > 0 ? ` 실패 ${failed}건.${message}` : "";
+}
+
+async function loadDashboard() {
+  const [status, ingestionRuns, searchLogs] = await Promise.all([
+    fetchJson("/api/admin/status"),
+    fetchJson("/api/admin/ingestion-runs"),
+    fetchJson("/api/admin/search-logs"),
+  ]);
+  renderStatus(status);
+  renderIngestionRuns(ingestionRuns);
+  renderSearchLogs(searchLogs);
+  await loadAgentTraces(traceRequestIdInput.value.trim());
+}
+
+async function loadAgentTraces(requestId = "") {
+  const normalized = requestId.trim();
+  traceRequestIdInput.value = normalized;
+  const url = normalized
+    ? `/api/admin/agent-traces?requestId=${encodeURIComponent(normalized)}`
+    : "/api/admin/agent-traces";
+  const response = await fetchJson(url);
+  renderAgentTraces({
+    ...response,
+    filteredRequestId: normalized,
+  });
+}
+
+async function loadLaws() {
+  const keyword = lawKeywordInput.value.trim();
+  const url = keyword ? `/api/laws?q=${encodeURIComponent(keyword)}&page=1&size=20` : "/api/laws?page=1&size=20";
+  const response = await fetchJson(url);
+  renderLaws(response);
+}
+
+async function loadLawDetail(lawId) {
+  const request = ++lawDetailRequest;
+  selectedLawId = selectedLawId === String(lawId) ? null : String(lawId);
+  lawListArea.querySelectorAll("[data-law-id]").forEach((button) => {
+    button.setAttribute("aria-expanded", String(button.dataset.lawId === selectedLawId));
+  });
+  if (selectedLawId === null) {
+    lawDetailArea.innerHTML = "";
+    return;
+  }
+  lawDetailArea.innerHTML = `<div class="inline-loading">법령 상세를 불러오는 중입니다.</div>`;
+  try {
+    const detail = await fetchJson(`/api/laws/${encodeURIComponent(lawId)}`);
+    if (request !== lawDetailRequest) return;
+    renderLawDetail(detail);
+  } catch (error) {
+    if (request !== lawDetailRequest) return;
+    lawDetailArea.innerHTML = `<div class="error-box small">${escapeHtml(error instanceof Error ? error.message : "법령 상세 조회에 실패했습니다.")}</div>`;
+  }
+}
+
+async function loadLawRevisions(lawId) {
+  const target = document.querySelector(`#law-revisions-${CSS.escape(String(lawId))}`);
+  if (!target) return;
+  try {
+    const revisions = await fetchJson(`/api/laws/${encodeURIComponent(lawId)}/revisions`);
+    target.innerHTML = renderLawRevisions(revisions);
+  } catch (error) {
+    target.innerHTML = `<div class="error-box small">${escapeHtml(error instanceof Error ? error.message : "법령 개정 이력 조회에 실패했습니다.")}</div>`;
+  }
+}
+
+async function runReindex() {
+  if (!reindexEnabled) {
+    reindexResult.textContent = "재색인은 비활성화되어 있습니다. ADMIN_REINDEX_ENABLED=true 설정 후 사용할 수 있습니다.";
+    return;
+  }
+  reindexButton.disabled = true;
+  reindexResult.textContent = "재색인을 실행 중입니다.";
+  try {
+    const response = await fetchJson("/api/admin/reindex", { method: "POST" });
+    reindexResult.textContent = `${response.status}: 조문 ${response.indexedArticles}건을 색인했습니다.${formatFailureSuffix(response)}`;
+    await loadDashboard();
+  } catch (error) {
+    reindexResult.textContent = error instanceof Error ? error.message : "재색인에 실패했습니다.";
+  } finally {
+    reindexButton.disabled = !reindexEnabled;
+  }
+}
+
+async function runProviderSmokeTest() {
+  providerSmokeButton.disabled = true;
+  providerSmokeResult.className = "provider-status muted";
+  providerSmokeResult.textContent = "Provider 연결을 점검하는 중입니다.";
+  try {
+    const response = await fetchJson("/api/admin/provider-smoke-test", { method: "POST" });
+    renderProviderSmoke(response);
+  } catch (error) {
+    providerSmokeResult.className = "provider-status error-box small";
+    providerSmokeResult.textContent = error instanceof Error ? error.message : "Provider 연결 점검에 실패했습니다.";
+  } finally {
+    providerSmokeButton.disabled = false;
+  }
+}
+
+async function runIngest() {
+  const sourceDir = sourceDirInput.value.trim();
+  if (!sourceDir) {
+    ingestResult.textContent = "수집할 디렉터리 경로를 입력하세요.";
+    return;
+  }
+  ingestButton.disabled = true;
+  ingestResult.textContent = "로컬 법령 파일을 수집하고 색인하는 중입니다.";
+  try {
+    const response = await fetchJson("/api/admin/ingest-local", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sourceDir, snapshotPrefix: "law-local" }),
+    });
+    ingestResult.textContent = `${response.status}: 법령 ${response.lawsImported}건, 조문 ${response.articlesImported}건을 수집하고 ${response.indexedArticles}건을 색인했습니다.${formatFailureSuffix(response)}`;
+    await Promise.all([loadDashboard(), loadLaws()]);
+  } catch (error) {
+    ingestResult.textContent = error instanceof Error ? error.message : "수집에 실패했습니다.";
+  } finally {
+    ingestButton.disabled = false;
+  }
+}
+
+async function runSourceSync() {
+  const repoUrl = sourceRepoUrlInput.value.trim();
+  const localDir = sourceLocalDirInput.value.trim();
+  const branch = sourceBranchInput.value.trim() || "main";
+  if (!repoUrl || !localDir) {
+    syncSourceResult.textContent = "저장소 URL과 저장 경로를 입력하세요.";
+    return;
+  }
+  syncSourceButton.disabled = true;
+  syncSourceResult.textContent = "저장소를 동기화하고 법령 파일을 수집하는 중입니다.";
+  try {
+    const response = await fetchJson("/api/admin/sync-source", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        repoUrl,
+        localDir,
+        branch,
+        ingestAfterSync: true,
+        snapshotPrefix: "law-source",
+      }),
+    });
+    const ingestion = response.ingestion;
+    sourceDirInput.value = response.localDir ?? localDir;
+    syncSourceResult.textContent = ingestion
+      ? `완료: ${response.action} · commit ${shortText(response.commitHash, 12)} · ${ingestion.status} · 법령 ${ingestion.lawsImported}건, 조문 ${ingestion.articlesImported}건 수집.${formatFailureSuffix(ingestion)}`
+      : `완료: ${response.action} · commit ${shortText(response.commitHash, 12)}`;
+    await Promise.all([loadDashboard(), loadLaws()]);
+  } catch (error) {
+    syncSourceResult.textContent = error instanceof Error ? error.message : "저장소 동기화에 실패했습니다.";
+  } finally {
+    syncSourceButton.disabled = false;
+  }
+}
+
+refreshButton.addEventListener("click", () => {
+  loadDashboard();
+  loadLaws();
+});
+
+statusArea.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action-detail-index]");
+  if (!button) return;
+  const action = actionItems[Number(button.dataset.actionDetailIndex)];
+  if (action) showActionDetails(action);
+});
+
+clearTraceFilterButton.addEventListener("click", () => {
+  loadAgentTraces();
+});
+
+traceRequestIdInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    loadAgentTraces(traceRequestIdInput.value);
+  }
+});
+
+reindexButton.addEventListener("click", runReindex);
+providerSmokeButton.addEventListener("click", runProviderSmokeTest);
+syncSourceButton.addEventListener("click", runSourceSync);
+ingestButton.addEventListener("click", runIngest);
+
+lawKeywordInput.addEventListener("input", () => {
+  window.clearTimeout(lawKeywordInput.searchTimer);
+  lawKeywordInput.searchTimer = window.setTimeout(loadLaws, 220);
+});
+
+loadDashboard().catch((error) => {
+  statusArea.innerHTML = `<div class="error-box">${escapeHtml(error instanceof Error ? error.message : "대시보드 조회에 실패했습니다.")}</div>`;
+});
+loadLaws().catch((error) => {
+  lawListArea.innerHTML = `<div class="error-box small">${escapeHtml(error instanceof Error ? error.message : "법령 목록 조회에 실패했습니다.")}</div>`;
+});
