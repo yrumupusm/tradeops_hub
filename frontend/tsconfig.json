@@ -44,7 +44,11 @@
     ".next-law-admin-layout/types/**/*.ts",
     ".next-law-admin-layout/dev/types/**/*.ts",
     ".next-law-admin-layout-final/types/**/*.ts",
-    ".next-law-admin-layout-final/dev/types/**/*.ts"
+    ".next-law-admin-layout-final/dev/types/**/*.ts",
+    ".next-law-viewport/types/**/*.ts",
+    ".next-law-viewport/dev/types/**/*.ts",
+    ".next-law-viewport-final/types/**/*.ts",
+    ".next-law-viewport-final/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

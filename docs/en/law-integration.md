@@ -61,6 +61,8 @@ LawIntegrationTest covers input, states, citations, projection, trace correlatio
 
 ## Owner administration
 
+Status also preserves syncState.lastSyncedCommitSha, lastSyncAt and lastForcePushDetectedAt without source paths. The UI restores sync metadata and notices for failed runs, missing/stale indexes and historical source rewrites. At widths >1100px and heights >=760px the base screen fits the viewport: summary above actions/runs, with internal list scrolling. Selecting a law shortens the corpus list to reveal the start of its details and permits document scrolling. Smaller viewports retain document scrolling. No data/index work runs automatically.
+
 `/law-admin` appears under 법령 조사, immediately after 법령 검색, for the fixed owner. The breadcrumb is 법령 조사 / 법령 검색 관리. Every `/api/v1/law-admin` endpoint also enforces backend owner authorization and the existing account/session restrictions.
 
 GET `/{section}` allows only status, laws, ingestion-runs, search-logs and agent-traces. Laws accept q (<=200 characters) and page (1..10000), size is fixed at 20. Traces accept an empty or canonical UUID requestId. GET `/laws/{id}` and `/laws/{id}/revisions` require positive IDs. Lists preserve upstream limits: 20 ingestion runs, 50 search logs, 100 traces. Logs link to filtered traces. Response projection excludes question previews/hashes, trace input/output, raw errors, source paths and repository URLs.

@@ -80,6 +80,25 @@ export default function LawAdmin({
 }: {
   onAuthError: (error: unknown) => void;
 }) {
+  const frame = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const update = () => {
+      if (frame.current)
+        frame.current.style.setProperty(
+          "--admin-space",
+          `${Math.max(320, window.innerHeight - frame.current.getBoundingClientRect().top - window.scrollY - 28)}px`,
+        );
+    };
+    update();
+    window.addEventListener("resize", update);
+    const observer = new ResizeObserver(update);
+    if (frame.current?.parentElement)
+      observer.observe(frame.current.parentElement);
+    return () => {
+      window.removeEventListener("resize", update);
+      observer.disconnect();
+    };
+  }, []);
   const [action, setAction] = useState("");
   const [running, setRunning] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
@@ -197,7 +216,10 @@ export default function LawAdmin({
     setSelected(null);
   }
   return (
-    <div className="law-admin">
+    <div
+      ref={frame}
+      className={`law-admin law-admin-tab-${tab}${selected !== null ? " law-admin-has-detail" : ""}`}
+    >
       <nav className="law-admin-tabs" aria-label="법령 관리 항목">
         {tabs.map(([value, label]) => (
           <button
@@ -212,7 +234,9 @@ export default function LawAdmin({
       </nav>
       {tab !== "search-logs" && (
         <>
-          <section className="panel">
+          <section
+            className={`panel ${tab === "status" ? "law-status-summary" : "law-corpus-panel"}`}
+          >
             <div className="law-admin-toolbar">
               <h2>{tabs.find(([value]) => value === tab)?.[1]}</h2>
               <button
@@ -260,23 +284,7 @@ export default function LawAdmin({
             ) : (
               !error &&
               (tab === "status" ? (
-                <dl className="law-admin-stats">
-                  {[
-                    ["indexStatus", "색인 상태"],
-                    ["lawsCount", "보유 법령"],
-                    ["articlesCount", "조문"],
-                    ["indexedArticlesCount", "색인 조문"],
-                    ["unindexedArticlesCount", "미색인 조문"],
-                    ["searchLogCount", "검색 로그"],
-                    ["lastSnapshotVersion", "최근 스냅샷"],
-                    ["lastIndexedAt", "최근 색인 시각"],
-                  ].map(([key, label]) => (
-                    <div key={key}>
-                      <dt>{label}</dt>
-                      <dd>{display(data[key])}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <StatusSummary data={data} />
               ) : (
                 <>
                   <div
@@ -382,99 +390,100 @@ export default function LawAdmin({
             )}
           </section>
           {tab === "status" && (
-            <section className="panel">
-              <h2>관리 작업</h2>
-              <p className="muted">
-                법령 서버에 설정된 자료 저장소와 경로를 사용합니다.
-                수집·동기화·재색인은 법령 데이터와 색인을 갱신합니다.
-              </p>
-              <div className="law-admin-tabs">
-                {Object.entries(actionNames).map(([key, label]) => (
-                  <button
-                    key={key}
-                    disabled={
-                      running ||
-                      pending ||
-                      !!error ||
-                      (key === "reindex" && data.reindexEnabled !== true)
-                    }
-                    onClick={() => {
-                      setAction(key);
-                      setActionMessage("");
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {data.reindexEnabled === false && (
+            <div className="law-operations-split">
+              <section className="panel law-actions-panel">
+                <h2>관리 작업</h2>
                 <p className="muted">
-                  재색인은 법령 서버에서 비활성화되어 있습니다.
+                  법령 서버에 설정된 자료 저장소와 경로를 사용합니다.
+                  수집·동기화·재색인은 법령 데이터와 색인을 갱신합니다.
                 </p>
-              )}
-              {action && !running && (
-                <div role="group" aria-label="관리 작업 확인">
-                  <p>
-                    {actionNames[action]} 작업을 실행할까요?
-                    {action !== "provider-smoke-test"
-                      ? " 기존 자료 또는 색인이 변경될 수 있습니다."
-                      : " 외부 모델 서비스 호출이 발생합니다."}
-                  </p>
-                  <button className="primary" onClick={execute}>
-                    실행
-                  </button>{" "}
-                  <button onClick={() => setAction("")}>취소</button>
+                <div className="law-admin-tabs">
+                  {Object.entries(actionNames).map(([key, label]) => (
+                    <button
+                      key={key}
+                      disabled={
+                        running ||
+                        pending ||
+                        !!error ||
+                        (key === "reindex" && data.reindexEnabled !== true)
+                      }
+                      onClick={() => {
+                        setAction(key);
+                        setActionMessage("");
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-              )}
-              {running && (
-                <p role="status">
-                  관리 작업을 처리하는 중입니다. 완료까지 기다려 주세요.
-                </p>
-              )}
-              <p role="status">{actionMessage}</p>
-              {actionResult && (
-                <dl className="law-admin-stats">
-                  {Object.entries(actionResult)
-                    .filter(([, value]) => typeof value !== "object")
-                    .map(([key, value]) => (
-                      <div key={key}>
-                        <dt>
-                          {{
-                            status: "상태",
-                            llmStatus: "답변 모델",
-                            embeddingStatus: "임베딩",
-                            rerankerStatus: "재정렬",
-                            indexedArticles: "색인 조문",
-                            failedArticles: "실패 조문",
-                            lawsImported: "수집 법령",
-                            articlesImported: "수집 조문",
-                            filesProcessed: "처리 파일",
-                            filesFailed: "실패 파일",
-                            startedAt: "시작 시각",
-                            finishedAt: "완료 시각",
-                            snapshotVersion: "스냅샷",
-                            ingestionRunId: "실행 번호",
-                            embeddingDimensions: "벡터 차원",
-                            rerankedCount: "재정렬 건수",
-                            action: "동기화 결과",
-                            commitHash: "자료 리비전",
-                          }[key] ?? key}
-                        </dt>
-                        <dd>{display(value)}</dd>
-                      </div>
-                    ))}
-                </dl>
-              )}
-            </section>
-          )}
-          {tab === "status" && (
-            <RunHistory revision={revision} onAuthError={onAuthError} />
+                {data.reindexEnabled === false && (
+                  <p className="muted">
+                    재색인은 법령 서버에서 비활성화되어 있습니다.
+                  </p>
+                )}
+                {action && !running && (
+                  <div role="group" aria-label="관리 작업 확인">
+                    <p>
+                      {actionNames[action]} 작업을 실행할까요?
+                      {action !== "provider-smoke-test"
+                        ? " 기존 자료 또는 색인이 변경될 수 있습니다."
+                        : " 외부 모델 서비스 호출이 발생합니다."}
+                    </p>
+                    <button className="primary" onClick={execute}>
+                      실행
+                    </button>{" "}
+                    <button onClick={() => setAction("")}>취소</button>
+                  </div>
+                )}
+                {running && (
+                  <p role="status">
+                    관리 작업을 처리하는 중입니다. 완료까지 기다려 주세요.
+                  </p>
+                )}
+                <p role="status">{actionMessage}</p>
+                {actionResult && (
+                  <dl className="law-admin-stats">
+                    {Object.entries(actionResult)
+                      .filter(([, value]) => typeof value !== "object")
+                      .map(([key, value]) => (
+                        <div key={key}>
+                          <dt>
+                            {{
+                              status: "상태",
+                              llmStatus: "답변 모델",
+                              embeddingStatus: "임베딩",
+                              rerankerStatus: "재정렬",
+                              indexedArticles: "색인 조문",
+                              failedArticles: "실패 조문",
+                              lawsImported: "수집 법령",
+                              articlesImported: "수집 조문",
+                              filesProcessed: "처리 파일",
+                              filesFailed: "실패 파일",
+                              startedAt: "시작 시각",
+                              finishedAt: "완료 시각",
+                              snapshotVersion: "스냅샷",
+                              ingestionRunId: "실행 번호",
+                              embeddingDimensions: "벡터 차원",
+                              rerankedCount: "재정렬 건수",
+                              action: "동기화 결과",
+                              commitHash: "자료 리비전",
+                            }[key] ?? key}
+                          </dt>
+                          <dd>{display(value)}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                )}
+              </section>
+              <RunHistory revision={revision} onAuthError={onAuthError} />
+            </div>
           )}
         </>
       )}
       {tab === "search-logs" && <SearchLogs onAuthError={onAuthError} />}
       {selected !== null && (
-        <section className="panel" aria-label="법령 상세">
+        <section className="panel law-detail-panel" aria-label="법령 상세">
+          <p className="muted">선택한 법령의 조문과 개정 이력</p>
           {detailError ? (
             <p role="alert">{detailError}</p>
           ) : !detail ? (
@@ -605,7 +614,7 @@ function RunHistory({
           disabled={state.pending}
           onClick={() => setRefresh((v) => v + 1)}
         >
-          수집 이력 새로고침
+          새로고침
         </button>
       </div>
       {state.pending ? (
@@ -785,5 +794,76 @@ function SearchLogs({ onAuthError }: AuthFailure) {
         </div>
       </section>
     </div>
+  );
+}
+
+function StatusSummary({ data }: { data: Data & Record<string, unknown> }) {
+  const sync = (data.syncState ?? {}) as Record<string, unknown>;
+  const failures = Array.isArray(data.recentFailures)
+    ? data.recentFailures.length
+    : 0;
+  const notices: string[] = [];
+  if (failures)
+    notices.push(`최근 실패한 수집 작업 ${failures}건을 확인하세요.`);
+  if (data.indexStatus === "missing" || data.indexStatus === "empty")
+    notices.push(
+      "검색 색인이 준비되지 않았습니다. 수집 및 색인 상태를 확인하세요.",
+    );
+  if (data.indexStatus === "stale")
+    notices.push(
+      `저장 조문과 색인 조문 수가 ${Math.abs(Number(data.articlesCount) - Number(data.indexedArticlesCount)).toLocaleString("ko-KR")}건 다릅니다. 색인 상태를 확인하세요.`,
+    );
+  if (sync.lastForcePushDetectedAt)
+    notices.push(
+      "원본 이력 변경이 감지된 기록이 있습니다. 다음 수집 전에 변경 내용을 확인하세요.",
+    );
+  return (
+    <>
+      <dl className="law-admin-stats law-status-counts">
+        {[
+          ["indexStatus", "색인 상태"],
+          ["lawsCount", "보유 법령"],
+          ["articlesCount", "조문"],
+          ["indexedArticlesCount", "색인 조문"],
+          ["unindexedArticlesCount", "미색인 조문"],
+          ["searchLogCount", "검색 로그"],
+        ].map(([key, label]) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>{display(data[key])}</dd>
+          </div>
+        ))}
+      </dl>
+      <dl className="law-admin-stats law-status-metadata">
+        {[
+          ["최근 스냅샷", data.lastSnapshotVersion],
+          ["최근 색인 시각", data.lastIndexedAt],
+          ["동기화 리비전", sync.lastSyncedCommitSha],
+          ["동기화 시각", sync.lastSyncAt],
+          ["원본 이력 변경 감지", sync.lastForcePushDetectedAt],
+        ].map(([label, value]) => (
+          <div key={String(label)}>
+            <dt>{String(label)}</dt>
+            <dd title={value == null ? undefined : String(value)}>
+              {label === "동기화 리비전" && value
+                ? String(value).slice(0, 12)
+                : display(value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className="law-status-notices" aria-label="조치 안내">
+        <strong>조치 안내</strong>
+        {notices.length ? (
+          <ul>
+            {notices.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>현재 확인이 필요한 조치가 없습니다.</p>
+        )}
+      </div>
+    </>
   );
 }

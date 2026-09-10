@@ -84,6 +84,27 @@ class LawAdminIntegrationTest {
   }
 
   @Test
+  void preservesSyncMetadataWithoutPrivatePaths() throws Exception {
+    when(client.administration("/api/admin/status"))
+        .thenReturn(
+            mapper.readTree(
+                """
+{"indexStatus":"stale","articlesCount":2,"syncState":{
+ "lastSyncedCommitSha":"fictional-revision","lastSyncAt":"2026-01-02T03:04:05",
+ "lastForcePushDetectedAt":"2026-01-03T03:04:05","sourcePath":"private"},
+ "recentFailures":[{"ingestionRunId":9,"status":"FAILED","errorMessage":"private"}]}
+"""));
+    mvc.perform(get(BASE + "/status").with(user("owner")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.syncState.lastSyncedCommitSha").value("fictional-revision"))
+        .andExpect(jsonPath("$.syncState.lastSyncAt").value("2026-01-02T03:04:05"))
+        .andExpect(jsonPath("$.syncState.lastForcePushDetectedAt").value("2026-01-03T03:04:05"))
+        .andExpect(jsonPath("$.syncState.sourcePath").doesNotExist())
+        .andExpect(jsonPath("$.recentFailures[0].status").value("FAILED"))
+        .andExpect(jsonPath("$.recentFailures[0].errorMessage").doesNotExist());
+  }
+
+  @Test
   void rejectsInvalidFiltersAndRoutesBeforeUpstream() throws Exception {
     for (String path :
         new String[] {

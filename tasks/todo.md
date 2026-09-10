@@ -2,6 +2,8 @@
 
 ## Law search integration — feat/law-search
 
+- [x] Restore synchronization metadata and actionable status notices; fit desktop administration to viewport with internal list scrolling, split actions/runs, and reveal selected law details. Fifteen focused API tests, full local gate, final frontend gate and builds passed. Deployed API law-viewport and web .next-law-viewport-final on 8081/3000. Browser checks passed at 2048x1024, 1440x900, 1366x768 (no base document scroll), plus narrow/short fallback. Internal runs/logs/100 mocked traces scroll; law details begin within the viewport. RAG article/vector counts unchanged.
+
 - [x] Consolidate administration into three tabs: status/actions/runs, corpus, and linked side-by-side logs/traces. Local frontend gate and production build passed. Deployed `.next-law-admin-layout-final` on 3000; actual request selection/direct lookup/reset/error isolation and 1440/768/390 layout checks passed. Final desktop tables fit both columns. Stale requests are aborted and ignored. Sidebar/breadcrumb move is now live. API and RAG were not restarted.
 
 - [x] Move owner-only law administration beneath law search in the 법령 조사 sidebar group; derive the matching breadcrumb and preserve backend authorization. Frontend local gate passed; the running production web requires a rebuild/restart to display the new menu position.
