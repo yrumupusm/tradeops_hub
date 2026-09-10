@@ -2,6 +2,8 @@
 
 ## README review flow
 
+- [x] Refine public README around service introduction, screen workflows, capabilities, architecture, design and quality checks; remove migration/runtime diary content and self-promotional copy. Local links, code fences, repository safety/scenarios and eight verification-tool tests passed. Screen workflows use a table; no publishable screenshot assets are available. Documentation only; no application rebuild required.
+
 - [x] Lead README with product workflows, architecture, design decisions and verified outcomes/limits; move startup instructions to paired runbooks. Changed-document links/code fences, repository safety/scenario checks and all eight verification-tool tests passed. Documentation only; application tests/builds were not rerun.
 
 ## Local law runtime retirement
