@@ -1,14 +1,7 @@
-# 아키텍처 결정 기록
+# Architecture decisions
 
-각 ADR은 현재 채택한 설계의 상황, 대안, 결정, 결과를 기록합니다. 채택은 운영 검증이 모두 끝났다는 뜻이 아닙니다. 결정별 구현 한계와 후속 작업을 함께 남깁니다.
-
-| 번호 | 결정 | 상태 | 기록일 |
-| --- | --- | --- | --- |
-| [0001](0001-web-api-relational-storage.md) | 웹·API 분리와 관계형 데이터 저장 | 채택 | 2026-09-08 |
-| [0002](0002-versioned-snapshots.md) | 원본 버전별 스냅샷과 체크섬 기반 중복 처리 | 채택 | 2026-09-08 |
-| [0003](0003-local-source-boundary.md) | 재현 가능한 로컬 원본과 수집 경계 | 채택 | 2026-09-08 |
-| [0004](0004-authorization-and-traceability.md) | 서버 권한 제어와 요청 단위 추적 | 채택 | 2026-09-08 |
-
-새 결정은 `NNNN-short-title.md`로 추가합니다. 기존 결정을 대체할 때는 원문을 삭제하지 않고 상태와 대체 ADR 링크를 갱신합니다.
-
-[C4 모델](../architecture/c4.md) · [arc42](../arc42.md)
+- [0001 — Web, API and relational storage](0001-web-api-relational-storage.md): retained.
+- [0002 — Versioned snapshots](0002-versioned-snapshots.md): historical; BIS row identity is superseded by 0005.
+- [0003 — Local source boundary](0003-local-source-boundary.md): historical; public BIS collection replaces the local-only boundary.
+- [0004 — Authorization and traceability](0004-authorization-and-traceability.md): historical; server sessions and a fixed owner replace JWT/roles.
+- [0005 — BIS sessions and provenance](0005-bis-sessions-and-provenance.md): current collection, search, identity and account decisions.

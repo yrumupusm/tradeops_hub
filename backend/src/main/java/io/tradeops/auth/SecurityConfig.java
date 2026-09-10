@@ -1,42 +1,125 @@
 package io.tradeops.auth;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import io.tradeops.account.AccountService;
+import io.tradeops.error.OperationException;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.*;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.csrf.*;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, ApiAuthenticationEntryPoint authenticationEntryPoint, ApiAccessDeniedHandler accessDeniedHandler) throws Exception {
-        return http.cors(cors -> {}).csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(authenticationEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/health", "/actuator/health", "/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/watchlist/runs", "/api/v1/imports", "/api/v1/screening-reviews").hasAnyRole("ADMIN", "OPERATOR")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN").anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
-    }
-    @Bean CorsConfigurationSource corsConfigurationSource(@Value("${tradeops.web.allowed-origin:http://localhost:3000}") String allowedOrigin) {
-        CorsConfiguration cors=new CorsConfiguration(); cors.setAllowedOrigins(List.of(allowedOrigin)); cors.setAllowedMethods(List.of("GET","POST","OPTIONS")); cors.setAllowedHeaders(List.of("Authorization","Content-Type","X-Correlation-Id")); cors.setExposedHeaders(List.of("X-Correlation-Id"));
-        UrlBasedCorsConfigurationSource source=new UrlBasedCorsConfigurationSource(); source.registerCorsConfiguration("/api/**",cors); return source;
-    }
-    @Bean UserDetailsService noDefaultPasswordAuthentication() { return username -> { throw new UsernameNotFoundException("Password authentication is not enabled."); }; }
-    @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+  @Bean
+  SecurityFilterChain chain(
+      HttpSecurity http,
+      AccountService accounts,
+      com.fasterxml.jackson.databind.ObjectMapper mapper)
+      throws Exception {
+    var csrf = new HttpSessionCsrfTokenRepository();
+    csrf.setHeaderName("X-CSRF-TOKEN");
+    return http.csrf(
+            c ->
+                c.csrfTokenRepository(csrf)
+                    .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+        .requestCache(c -> c.disable())
+        .formLogin(c -> c.disable())
+        .httpBasic(c -> c.disable())
+        .logout(c -> c.disable())
+        .authorizeHttpRequests(
+            c ->
+                c.requestMatchers(
+                        "/api/v1/health",
+                        "/actuator/health",
+                        "/api/v1/auth/csrf",
+                        "/api/v1/auth/login")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .exceptionHandling(
+            c ->
+                c.authenticationEntryPoint(
+                        (r, s, e) -> error(r, s, mapper, "AUTHENTICATION_REQUIRED", 401))
+                    .accessDeniedHandler(
+                        (r, s, e) ->
+                            error(
+                                r,
+                                s,
+                                mapper,
+                                e instanceof CsrfException ? "CSRF_INVALID" : "ACCESS_DENIED",
+                                403)))
+        .addFilterBefore(
+            new OncePerRequestFilter() {
+              protected void doFilterInternal(
+                  HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+                  throws ServletException, IOException {
+                var a = SecurityContextHolder.getContext().getAuthentication();
+                if (a != null && a.isAuthenticated() && !"anonymousUser".equals(a.getPrincipal()))
+                  try {
+                    var user = accounts.get(a.getName());
+                    String path = req.getRequestURI();
+                    if (user.mustChangePassword()
+                        && !java.util.Set.of(
+                                "/api/v1/auth/me",
+                                "/api/v1/auth/csrf",
+                                "/api/v1/auth/logout",
+                                "/api/v1/account/password")
+                            .contains(path)) {
+                      error(req, res, mapper, "PASSWORD_CHANGE_REQUIRED", 403);
+                      return;
+                    }
+                  } catch (OperationException e) {
+                    SecurityContextHolder.clearContext();
+                    if (req.getSession(false) != null) req.getSession().invalidate();
+                    error(req, res, mapper, e.code(), e.status());
+                    return;
+                  }
+                chain.doFilter(req, res);
+              }
+            },
+            AuthorizationFilter.class)
+        .build();
+  }
+
+  private static void error(
+      HttpServletRequest req,
+      HttpServletResponse res,
+      com.fasterxml.jackson.databind.ObjectMapper mapper,
+      String code,
+      int status)
+      throws IOException {
+    res.setStatus(status);
+    res.setContentType("application/json");
+    mapper.writeValue(
+        res.getOutputStream(),
+        java.util.Map.of(
+            "code",
+            code,
+            "message",
+            "요청을 처리할 수 없습니다.",
+            "correlationId",
+            String.valueOf(req.getAttribute("correlationId"))));
+  }
+
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  org.springframework.security.core.userdetails.UserDetailsService noDefaultUser() {
+    return username -> {
+      throw new org.springframework.security.core.userdetails.UsernameNotFoundException(
+          "ACCOUNT_LOGIN_REQUIRED");
+    };
+  }
 }

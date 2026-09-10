@@ -1,11 +1,23 @@
 server:
   port: ${API_PORT:8081}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
   error:
     include-message: never
     include-stacktrace: never
 spring:
   application:
     name: tradeops-api
+  session:
+    timeout: ${SESSION_TIMEOUT:30m}
+    jdbc:
+      initialize-schema: never
+  flyway:
+    locations: classpath:db/migration,classpath:db/{vendor}
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:tradeops_hub}
     username: ${POSTGRES_USER:tradeops}
@@ -22,9 +34,13 @@ management:
     health:
       show-details: never
 tradeops:
-  demo-users:
-    enabled: ${SEED_DEMO_USERS:false}
-  security:
-    jwt-issuer: ${JWT_ISSUER:tradeops-hub}
-    jwt-secret: ${JWT_SECRET}
-    jwt-expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+  owner:
+    username: ${OWNER_USERNAME:admin@tradeops.test}
+    password: ${OWNER_INITIAL_PASSWORD:}
+  bis:
+    guide-url: ${BIS_GUIDE_URL:https://www.bis.gov/licensing/guidance-on-end-user-and-end-use-controls-and-us-person-controls}
+    allowed-hosts: ${BIS_ALLOWED_HOSTS:bis.gov,www.bis.gov,media.bis.gov}
+    storage: ${BIS_STORAGE_PATH:./storage/bis}
+    schedule-enabled: ${BIS_SCHEDULE_ENABLED:true}
+    cron: ${BIS_SCHEDULE_CRON:0 0 9 * * MON}
+    zone: ${BIS_SCHEDULE_ZONE:Asia/Seoul}

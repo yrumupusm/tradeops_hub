@@ -4,9 +4,11 @@
 
 # Build and generated evidence
 artifacts/
+storage/
 backend/build/
 backend/target/
 frontend/.next/
+frontend/.next-verify/
 frontend/node_modules/
 *.tsbuildinfo
 

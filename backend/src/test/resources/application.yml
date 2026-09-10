@@ -1,6 +1,9 @@
 server:
   port: 0
 spring:
+  session:
+    jdbc:
+      initialize-schema: never
   datasource:
     url: jdbc:h2:mem:tradeops;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     username: sa
@@ -10,7 +13,5 @@ spring:
     hibernate:
       ddl-auto: validate
 tradeops:
-  security:
-    jwt-issuer: tradeops-test
-    jwt-secret: dHJhZGVvcHMtdGVzdC1zZWNyZXQtbXVzdC1iZS1hdC1sZWFzdC0zMi1ieXRlcy1sb25nLQ==
-    jwt-expiration-minutes: 60
+  bis:
+    schedule-enabled: false
