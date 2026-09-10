@@ -1,5 +1,9 @@
 # Delivery checklist — BIS workspace
 
+## README review flow
+
+- [x] Lead README with product workflows, architecture, design decisions and verified outcomes/limits; move startup instructions to paired runbooks. Changed-document links/code fences, repository safety/scenario checks and all eight verification-tool tests passed. Documentation only; application tests/builds were not rerun.
+
 ## Local law runtime retirement
 
 - [x] Make the former GitHub repository private and switch law runtime to the monorepo with schema validation. Live counts and snapshot unchanged: 44 laws, 4112 articles, 4431 indexed articles. Existing DB/vector volumes and external Markdown source preserved.

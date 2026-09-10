@@ -4,7 +4,21 @@
 
 ## Configuration and startup
 
-Follow the [README](../../README.md) to start PostgreSQL, API and web. Only the local API startup script reads the root `.env`. Pass frontend `API_PROXY_TARGET` and deployment variables to their respective processes. See [.env.example](../../.env.example).
+Java 17, Maven, Node.js 22 or later and Docker are required.
+
+1. Copy root `.env.example` to `.env` and configure the DB password and initial owner password.
+2. Run `docker compose up -d` to start PostgreSQL.
+3. Run `powershell -File scripts/start-api-local.ps1 -MavenPath <mvn.cmd path>` to start the API.
+4. In another terminal, run `npm ci` and `npm run dev` in `frontend`. The default API URL is `http://127.0.0.1:8081`; set the web process `API_PROXY_TARGET` if it differs.
+5. Open `http://localhost:3000`, sign in with the configured owner account and perform the first collection in **우려거래자 수집 관리**.
+
+In a separate terminal, enter `services/law-search`, prepare its service-specific `.env` from `.env.example`, then run `powershell -File scripts/server.ps1 start -MavenPath <mvn.cmd path>`. Follow the [law runbook](../../services/law-search/docs/en/runbook.md) for PostgreSQL, Qdrant and real provider settings. Set Hub API `LAW_RAG_BASE_URL` to the law server (local default `http://127.0.0.1:8080`).
+
+Preserve existing DB/vector collections without reingestion or reembedding during repository migration. The law Compose project name is pinned. Hub DB defaults to port 5433 and law DB to 5432; explicit environment settings take precedence.
+
+The initial owner password only applies on first creation; environment changes do not overwrite an existing DB account password. Use HTTPS and `SESSION_COOKIE_SECURE=true` in deployment. Persist original files and back them up alongside PostgreSQL.
+
+Only the local API startup script reads root `.env`. Pass frontend `API_PROXY_TARGET` and deployment variables to their respective processes. See [.env.example](../../.env.example).
 
 Bootstrap the owner with `OWNER_USERNAME` and `OWNER_INITIAL_PASSWORD`; an existing password is not overwritten. There is no role editor. JWT is no longer used and existing installations must log in again. Preserve Flyway V1–V4 and apply V5–V8. The PostgreSQL account needs permission to create pg_trgm.
 
@@ -47,3 +61,7 @@ Distinguish server-free, PostgreSQL and runtime/browser checks in the [verificat
 
 
 Law search uses a separate RAG service. See [law integration](law-integration.md) for questions, citations, history/diff, authorization and data preservation.
+
+## Monorepo verification
+
+From the root, run `powershell -File scripts/verify-monorepo.ps1 -MavenPath <mvn.cmd path>`. This runs Hub checks, law JavaScript syntax checks and the full law Maven suite with temporary H2/mock configuration, without real DB or model use. `scripts/verify-local.ps1` runs Hub unit tests, verification-tool tests and frontend type checks without a server. Follow the [verification guide](evaluation-harness.md) for actual PostgreSQL/runtime checks.
