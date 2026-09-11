@@ -906,6 +906,13 @@ summary {
 .law-admin-toolbar input {
   width: 100%;
 }
+form.law-admin-toolbar {
+  align-items: flex-end;
+}
+form.law-admin-toolbar input,
+form.law-admin-toolbar > button {
+  height: 40px;
+}
 .law-admin-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
