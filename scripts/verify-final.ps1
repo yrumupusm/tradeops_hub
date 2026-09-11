@@ -126,7 +126,9 @@ try {
     $deadline = [DateTime]::UtcNow.AddSeconds(60)
     $ready = $false
     while ([DateTime]::UtcNow -lt $deadline) {
-        & docker exec $ContainerId pg_isready -U tradeops_verify -d tradeops_verify *> (Join-Path $RunDirectory "postgres-ready.log")
+        # The image's temporary initialization server only opens a Unix socket.
+        # Wait for TCP so createdb cannot race that server's shutdown.
+        & docker exec $ContainerId pg_isready -h 127.0.0.1 -U tradeops_verify -d tradeops_verify *> (Join-Path $RunDirectory "postgres-ready.log")
         if ($LASTEXITCODE -eq 0) { $ready = $true; break }
         Start-Sleep -Milliseconds 500
     }
