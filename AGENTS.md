@@ -45,8 +45,8 @@ data, internal names, URLs, credentials, screenshots, or commit history.
   outcome, and creation timestamp.
 - A completed import run has immutable aggregate counts. Failed rows remain
   reviewable with a safe error code; they are never silently discarded.
-- Screening decisions record the actor, timestamp, matched entity, score, and
-  disposition. A match is not automatically a compliance conclusion.
+- Screening decisions and dispositions are outside the current scope. Search
+  matches indicate name similarity, not identity or a compliance conclusion.
 - Authorization is enforced by the backend, not only hidden in the frontend.
 - Mutating requests are validated and auditable with a correlation ID.
 - Health responses disclose component state but never credentials, connection

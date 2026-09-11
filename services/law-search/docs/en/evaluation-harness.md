@@ -39,7 +39,7 @@ As in the original `law_research_assistant`, evaluate retrieval recall separatel
 | --- | --- |
 | Critic Status | Status after `CriticAgent` review must match the expectation |
 | Korean Visible Text | Reasoning and follow-up questions must not appear as English-dominant sentences |
-| Forbidden Copy | Block portfolio/demo wording: demo, sample, 샘플, 데모, 미니 프로젝트 |
+| Forbidden Copy | Block demonstration-only wording: demo, sample, 샘플, 데모, 미니 프로젝트 |
 | Decisive Legal Phrase | Block definitive phrases such as 문제없습니다, 합법입니다, 위법입니다 |
 | Min Cited Articles | OK or LOW_CONFIDENCE answers must preserve citations |
 | Valid Article Numbers | At least one article number specified in the set must occur in citedArticles |

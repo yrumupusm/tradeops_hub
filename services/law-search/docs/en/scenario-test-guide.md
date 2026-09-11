@@ -188,4 +188,4 @@ Confirm that search logs, agent traces, and reindex run histories are created.
 - The admin index status is `healthy`.
 - `/api/ask` retains the camelCase contract used by the Spring UI.
 - `/api/v1/ask` and `/api/v1/admin/status` retain the original-compatible snake_case contract.
-- Responses do not expose portfolio-oriented wording such as demo, sample, or mini project.
+- Responses do not expose demonstration-only wording such as demo, sample, or mini project.

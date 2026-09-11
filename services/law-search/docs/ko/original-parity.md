@@ -3,7 +3,7 @@
 [한국어](../ko/original-parity.md) | [English](../en/original-parity.md)
 
 이 문서는 원본 `law_research_assistant`의 지침을 Spring Boot 구현과 연결합니다.
-Spring 버전은 포트폴리오 규모의 재구현이며 FastAPI·Next.js 코드를 줄 단위로 옮긴 프로젝트가 아닙니다. 원본 제품의 불변 조건을 유지하면서 Spring Boot, JPA, Thymeleaf를 사용하지 않는 정적 UI, 제공자 인터페이스로 기술 구성을 교체했습니다.
+Spring 버전은 독립적으로 재구현한 서비스이며 FastAPI·Next.js 코드를 줄 단위로 옮긴 프로젝트가 아닙니다. 원본 제품의 불변 조건을 유지하면서 Spring Boot, JPA, Thymeleaf를 사용하지 않는 정적 UI, 제공자 인터페이스로 기술 구성을 교체했습니다.
 
 회사 기밀 코드, 내부 데이터, 계정 정보, 비공개 URL은 포함하지 않습니다.
 
@@ -112,7 +112,7 @@ Spring 구현:
 - Qdrant 벡터 저장소: `QdrantVectorSearchClient`
 - Cohere 재정렬: `CohereRerankerClient`
 
-mock 제공자는 로컬 개발용 대체 구현이며, 포트폴리오 검증에서 목표로 하는 최종 실서버 실행 근거는 아닙니다.
+mock 제공자는 로컬 개발용 대체 구현이며, 서비스 검증에서 목표로 하는 최종 실서버 실행 근거는 아닙니다.
 
 ## 감사·운영 관측 대응
 
@@ -144,12 +144,12 @@ mock 제공자는 로컬 개발용 대체 구현이며, 포트폴리오 검증�
 ## 의도적인 차이
 
 - 원본은 FastAPI, Next.js, Qdrant, Docker Compose를 사용했습니다. 이 구현은 Spring Boot, JPA, 정적 프런트엔드 파일과 교체 가능한 Qdrant 지원을 사용합니다.
-- 원본 P0는 기준일 검색과 개정 비교 UI를 제외했습니다. Spring 구현은 포트폴리오 설명을 강화하기 위해 통제된 `asOf`, 이력, 비교 지원을 추가했지만, 핵심 질문 흐름은 이 확장 없이도 동작합니다.
+- 원본 P0는 기준일 검색과 개정 비교 UI를 제외했습니다. Spring 구현은 기준일에 따른 조사와 개정 내용 확인을 지원하기 위해 통제된 `asOf`, 이력, 비교 지원을 추가했지만, 핵심 질문 흐름은 이 확장 없이도 동작합니다.
 - 원본 P0는 재정렬을 인터페이스와 mock으로 제한했습니다. 이 구현은 Cohere 재정렬도 지원하고 로컬 개발용 mock을 유지합니다.
 
 ## 남은 실서버 검증
 
-로컬 테스트는 서버를 시작하지 않고 구현 계약을 검증할 수 있습니다. 전체 포트폴리오 검증 근거를 만들려면 제공자를 설정한 서버를 수동 실행한 뒤 다음 명령을 사용해야 합니다.
+로컬 테스트는 서버를 시작하지 않고 구현 계약을 검증할 수 있습니다. 전체 실행 검증 근거를 만들려면 제공자를 설정한 서버를 수동 실행한 뒤 다음 명령을 사용해야 합니다.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-final.ps1

@@ -188,4 +188,4 @@ http://localhost:8080/api/admin/ingestion-runs
 - 관리자 상태의 색인이 `healthy`다.
 - `/api/ask`는 Spring UI용 camelCase 계약을 유지한다.
 - `/api/v1/ask`와 `/api/v1/admin/status`는 원본 호환 snake_case 계약을 유지한다.
-- 응답에 demo/sample/mini project 등 포트폴리오 설명용 문구가 노출되지 않는다.
+- 응답에 demo/sample/mini project 등 시연용 문구가 노출되지 않는다.

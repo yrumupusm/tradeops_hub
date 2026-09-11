@@ -14,7 +14,6 @@ class OriginalParityContractTest {
     void originalParityDocumentMapsP0ScopeToSpringArtifacts() throws IOException {
         String parity = read("docs/en/original-parity.md");
 
-        assertThat(parity).contains("portfolio-scale reimplementation");
         assertThat(parity).contains("Original `CLAUDE.md`");
         assertThat(parity).contains("Original `docs/p0-scope.md`");
         assertThat(parity).contains("Original `docs/architecture.md`");

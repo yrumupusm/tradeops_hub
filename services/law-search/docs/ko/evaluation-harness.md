@@ -39,7 +39,7 @@ LLM/RAG 기능은 응답이 흔들릴 수 있으므로 고정 질문셋으로 �
 |---|---|
 | Critic Status | `CriticAgent` 검토 후 기대 상태와 일치해야 한다 |
 | Korean Visible Text | reasoning과 follow-up question이 영어 중심 문장으로 노출되지 않아야 한다 |
-| Forbidden Copy | demo, sample, 샘플, 데모, 미니 프로젝트 같은 포트폴리오/시연 문구를 차단한다 |
+| Forbidden Copy | demo, sample, 샘플, 데모, 미니 프로젝트 같은 시연용 문구를 차단한다 |
 | Decisive Legal Phrase | 문제없습니다, 합법입니다, 위법입니다 같은 단정 문구를 차단한다 |
 | Min Cited Articles | OK 또는 LOW_CONFIDENCE 답변은 인용 조문을 유지해야 한다 |
 | Valid Article Numbers | 평가셋에 지정한 조문번호 중 최소 1건이 citedArticles에 있어야 한다 |

@@ -45,7 +45,7 @@ AskController
 - Keep controllers thin. HTTP request/response handling belongs in controllers; analysis, retrieval, validation, answer writing, and logging belong in services or agents.
 - Keep LLM, embedding, vector search, and reranker integrations behind provider interfaces.
 - Store provider names, URLs, model names, and API keys in configuration or environment variables only.
-- Run a relevant test before reporting a change as complete. Prefer `mvn test` for behavior changes.
+- Run a relevant test before reporting a change as complete. Use the root `scripts/verify-monorepo.ps1` for behavior changes; it isolates tests from real databases and providers.
 
 ## Never Do
 
@@ -64,11 +64,11 @@ AskController
 2. Update the closest existing document when behavior or guarantees change.
 3. Add or update fixed evaluation questions in `harness/questions.json` when a user-visible answer behavior changes.
 4. Add focused tests for new invariants before broad refactors.
-5. Verify with the narrowest useful test, then with `mvn test` when the change touches shared behavior.
+5. Verify with the narrowest useful test, then with the root isolated monorepo gate when the change touches shared behavior.
 6. Check `git status --short` before and after edits so local-only files, secrets, generated output, and unrelated user changes stay out of commits.
 7. Commit each verified, meaningful unit of work separately; avoid broad "misc" commits that mix docs, tests, behavior, formatting, and generated artifacts.
 8. Push after a milestone is complete or when the user asks for remote backup/review; do not wait until a large batch of unrelated work has accumulated.
-9. Before pushing, review `git diff --stat`, confirm the intended files are staged, and keep `.env`, `target/`, local handoff notes, imported source repos, and private portfolio drafts untracked unless explicitly requested.
+9. Before pushing, review `git diff --stat`, confirm the intended files are staged, and keep `.env`, `target/`, local handoff notes, imported source repos, and private personal drafts untracked unless explicitly requested.
 
 ## Git Workflow
 
@@ -87,4 +87,4 @@ AskController
 - Provider abstraction: `ProviderInterfaceTest`
 - Documentation pairing and links: `DocumentationLanguageContractTest`
 - Original project parity: `OriginalParityContractTest`, `docs/en/original-parity.md`
-- Full regression: `mvn test`
+- Full regression: root `scripts/verify-monorepo.ps1` (isolated H2/mock settings)

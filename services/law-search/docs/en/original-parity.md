@@ -3,7 +3,7 @@
 [한국어](../ko/original-parity.md) | [English](../en/original-parity.md)
 
 This document maps the original `law_research_assistant` guidance to this Spring Boot implementation.
-The Spring version is a portfolio-scale reimplementation, not a line-by-line port of the FastAPI and
+The Spring version is an independent reimplementation, not a line-by-line port of the FastAPI and
 Next.js codebase. It keeps the original product invariants while replacing the stack with Spring Boot,
 JPA, Thymeleaf-free static UI, and provider interfaces.
 
@@ -114,7 +114,7 @@ External provider implementations:
 - Qdrant vector store: `QdrantVectorSearchClient`
 - Cohere reranker: `CohereRerankerClient`
 
-The mock providers are local development fallbacks, not the intended final runtime evidence for portfolio
+The mock providers are local development fallbacks, not the intended final runtime evidence for service
 verification.
 
 ## Audit And Observability Mapping
@@ -151,14 +151,14 @@ contracts and scripts:
 - The original stack was FastAPI, Next.js, Qdrant, and Docker Compose. This implementation uses Spring Boot,
   JPA, static frontend assets, and pluggable Qdrant support.
 - The original P0 excluded date-based search and revision comparison UI. The Spring implementation includes
-  controlled `asOf`, history, and diff support as extensions because they strengthen the portfolio story, but
+  controlled `asOf`, history, and diff support as extensions to support date-specific research and revision review, but
   the core ask flow still works without those extensions.
 - The original P0 kept the reranker as interface plus mock. This implementation also supports Cohere reranking,
   with mock retained for local development.
 
 ## Remaining Runtime Proof
 
-Local tests can prove the implementation contracts without starting the server. Full portfolio evidence still
+Local tests can prove the implementation contracts without starting the server. Full runtime evidence still
 requires a manual server run with configured providers:
 
 ```powershell

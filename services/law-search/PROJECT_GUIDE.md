@@ -66,6 +66,6 @@ This configuration implements a Spring Boot AX/RAG research workflow within a li
 - Check `git status --short` before editing, before committing, and before pushing.
 - Commit behavior changes with the focused tests or harness updates that prove them.
 - Keep documentation-only updates separate from runtime behavior changes unless the documentation is part of the same contract change.
-- Do not stage secrets, `.env`, `target/`, local handoff notes, imported law-source repositories, or private portfolio/application drafts unless the user explicitly asks for them.
+- Do not stage secrets, `.env`, `target/`, local handoff notes, imported law-source repositories, or private personal drafts unless the user explicitly asks for them.
 - Push after a tested milestone or when remote review/backup is needed; avoid saving many unrelated completed changes for one final push.
 - Do not rewrite remote history or force-push for this application repository unless the user explicitly requests it.
