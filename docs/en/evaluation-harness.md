@@ -25,3 +25,11 @@ Real BIS connectivity is a separate live acceptance check: run DPL/EL against th
 ## Latest delivery status
 
 See [tasks](../../tasks/todo.md) for which gates and browser checks have actually been executed for this revision. Do not reuse the earlier transaction/JWT suite's successful result for the BIS implementation.
+
+## Pre-publication review — 2026-09-11
+
+The isolated final gate passed local tests, production builds, PostgreSQL integration/performance checks, all six HTTP acceptance scenarios, evidence validation, persistence assertions and cleanup. Evidence ID: `8e3ffe12-fc38-4a47-bf23-eb22c457396b`. Generated evidence remains ignored. PostgreSQL readiness now waits for TCP, avoiding the image's temporary initialization socket.
+
+Local service verification and external publication are separate: no public hostname or tunnel was enabled. Before publication, configure HTTPS/secure cookies, startup and recovery on the hosting machine, restricted infrastructure access and explicit visitor permissions/model usage limits. Ordinary Hub accounts currently can collect/download; they are not read-only demo accounts. The law service does not authenticate Hub sessions itself and must stay internal.
+
+The monorepo regression passed all 194 law tests. Current-browser smoke checks passed login, watchlist query/CSV, actual DPL/EL collection (1,982/6,660 rows), run-detail original download, a real law answer (OK/five citations), citation expansion and four-stage request tracing. Corpus/trace forms have equal 40px controls; desktop 1440x900 and 1366x768 fit without document scrolling, and 390px has no horizontal overflow. Initial anonymous /auth/me 401 responses are expected. These targeted live checks supplement the isolated scenarios; they do not assert unrestricted public deployment readiness.

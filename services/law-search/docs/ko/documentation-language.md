@@ -2,7 +2,7 @@
 
 [한국어](../ko/documentation-language.md) | [English](../en/documentation-language.md)
 
-이 저장소는 TradeOps Hub의 한·영 분리 문서 관리 방식을 따릅니다. 2026-09-10에 확인한 기준은 로컬 `C:\dev\tradeops_hub\AGENTS.md`의 `Documentation languages and Korean UX`와 `PROJECT_GUIDE.md`의 `Documentation entry points`입니다. [TradeOps Hub 지침서](https://github.com/yrumupusm/tradeops_hub/blob/main/AGENTS.md)는 원격 확인 경로이며, 로컬 작업 문서와 갱신 시점이 다를 수 있습니다.
+이 서비스는 모노레포의 [작업 지침](../../../../AGENTS.md)과 [프로젝트 안내](../../../../PROJECT_GUIDE.md)를 따른다. 한국어 공개 문서와 영어 구현 참고 문서는 하나의 설계를 설명하며 함께 갱신한다.
 
 ## 문서 구성
 

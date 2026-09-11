@@ -14,6 +14,8 @@ Independent implementation; no company source or data. Actual public BIS runtime
 
 Users collect/search/export; the fixed owner additionally manages accounts, audit and held-run approval. External dependency: official BIS guidance and media downloads. Transactions, role editing and screening decisions are excluded. See [scope](product-scope.md).
 
+Law search adds the internal RAG process, law PostgreSQL, Qdrant, configured Markdown Git sources and external LLM/embedding/reranking providers. Authenticated users ask questions and inspect citations/history; only the owner performs law administration. Models assist research rather than issue final legal decisions.
+
 ## 4. Solution strategy
 
 Persist server sessions instead of browser JWTs. Discover links each collection, validate host and schema, preserve raw rows and build separate normalized search names. Publish snapshots atomically. Pin source versions across pages and export. Use trigram similarity with explicit Korean expansion and display candidate type.
@@ -29,6 +31,8 @@ Persist server sessions instead of browser JWTs. Discover links each collection,
 - Search: resolve current source IDs once or accept pinned IDs → normalize query → exact/alias/partial/similar ranking → group exact duplicate rows → return page and IDs. Personal history is opt-in on explicit search.
 - Export: repeat the query with fixed IDs, CSV-escape/formula-protect fields, audit row count and snapshot IDs.
 - Restart: mark interrupted runs failed, clear active markers, execute one overdue schedule and advance next reservation.
+
+- Law question: Hub session/CSRF and input checks → allowlisted RAG request → analysis/retrieval/reranking → evidence and answer validation → projected citations and request correlation. Logs link to traces in owner administration.
 
 ## 7. Deployment
 

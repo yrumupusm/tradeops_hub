@@ -124,3 +124,9 @@ Confirm a `jdbc:h2:mem:` connection and mock providers in the execution logs. St
 ## TradeOps Hub Connection
 
 This service directory owns the RAG API and diagnostic screens. The monorepo frontend/backend own the user-facing UI and authentication integration. Hub defaults to PostgreSQL port 5433, law to 5432; actual configuration takes precedence. Preserve separate databases and volumes. See the [monorepo guide](../../../../docs/en/monorepo.md). Root `scripts/verify-monorepo.ps1` supplies isolated test settings automatically. Earlier separate-repository handoff notes are historical.
+
+## Index reconciliation without reembedding
+
+A count mismatch is a diagnostic signal, not proof that missing vectors must be regenerated. Compare current DB article IDs with vector point IDs and payload article IDs first. Pause data-changing jobs during maintenance. Back up the original collection with a Qdrant snapshot; copy only verified current IDs into a new collection with the same vector configuration. Compare every copied vector/payload hash and exact ID coverage before changing `VECTOR_COLLECTION` and restarting the law process. Preserve the original collection and configuration for rollback. Do not erase source-history-change detection or alter historical article dates to clear a notice.
+
+The 2026-09-11 maintenance found 319 orphan points and no missing current articles. All 4,112 current vectors were copied with identical hashes, original 4,431-point storage retained, and health changed to healthy. This is manual maintenance; automatic orphan cleanup and content-hash freshness tracking are not implemented. Counts/ID parity alone do not prove content freshness. Future ingestion/reindexing requires reviewing drift again.

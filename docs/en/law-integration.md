@@ -1,12 +1,12 @@
 # Law search integration
 
-Current repository policy: since 2026-09-11 the law service lives in `services/law-search/` in this monorepo. Runtime/data remain separate. Earlier two-repository statements below describe historical integration; [monorepo ownership](monorepo.md) supersedes that Git policy.
+Current repository policy: since 2026-09-11 the law service lives in `services/law-search/` in this monorepo. Runtime/data remain separate. See [monorepo ownership](monorepo.md) for Git boundaries.
 
 [한국어](../ko/law-integration.md) · [English](law-integration.md)
 
 ## Boundary and API
 
-Hub `/law-search` uses the existing Korean shell and native components. The law RAG repository owns analysis, retrieval, generation, PostgreSQL and Qdrant. No iframe, copied UI, shared DB or combined export-permission decision is introduced. The standalone RAG UI remains a development tool.
+Hub `/law-search` uses the existing Korean shell and native components. The law service in `services/law-search/` owns analysis, retrieval, generation, PostgreSQL and Qdrant. No iframe, copied UI, shared DB or combined export-permission decision is introduced. The standalone RAG UI remains a development tool.
 
 All routes require existing Hub session/active-account/password-change checks; POST also requires CSRF. Ordinary authenticated users may use them. Only these fixed routes are forwarded:
 
@@ -36,30 +36,13 @@ Server-only LAW_RAG_BASE_URL points to the existing internal origin (local examp
 
 LAW_RAG_TIMEOUT_SECONDS defaults to 180, allowed 1–180; connect timeout 5 seconds. The total deadline includes response reading, capped at 4 MiB. Next.js proxy is 195 seconds, browser 205 seconds. These finite budgets may expire across multiple provider calls/retries (provider defaults are 30 seconds each). Tune providers separately using measurements; never silently retry paid questions.
 
-Start existing RAG with its own server script and existing settings, then Hub with LAW_RAG_BASE_URL. Do not recreate databases, remove volumes/collections, reingest or reindex to connect. Hub has no RAG DB credentials and runs no law migration/vector writes. Hub-only restarts cause no RAG data work. Repositories and volumes stay separate.
-
-### Primary Hub deployment — 2026-09-10
-
-After preview verification, the `feat/law-search` release was applied to Hub web 3000/API 8081 with the existing Hub database, accounts and original-file storage. A database backup was retained under ignored artifacts. The existing administrator logged in, followed the sidebar law-search link and received a real answer with five citations through the same session. Account count (3), BIS rows (8642) and snapshots (2) were unchanged.
-
-The independent RAG process on 8080 was not restarted; its 4112 articles and 4431 vectors were preserved. Its repository was at `2f902ca` (documentation-only changes after the previously tested revision). No RAG source or data changes were made. Git repositories remain separate; deployment does not merge the Hub feature branch into main. The preview ports remain a separate verification environment.
+Start existing RAG with its own server script and existing settings, then Hub with LAW_RAG_BASE_URL. Do not recreate databases, remove volumes/collections, reingest or reindex to connect. Hub has no RAG DB credentials and runs no law migration/vector writes. Hub-only restarts cause no RAG data work. Git history is shared; runtime processes, configuration and volumes remain separate.
 
 ## Verification
 
-RAG inspected revision: 9c2d67fca773c50eca885a98b0a0b144f4dd742c; untracked output remains untouched. Hub branch feat/law-search is based on 7445fbf. Tested revisions and results are recorded below.
+LawIntegrationTest covers input, response states, citation invariants, projection, correlation, history/diff and session/CSRF/forced-password-change/deactivation. LawClientTest covers controlled HTTP failures, redirects, malformed JSON, deadlines and no retries. LawAdminIntegrationTest covers the owner boundary and read/action allowlists. Browser checks supplement these contracts; production builds alone are not acceptance.
 
-Initial and post-verification read-only health: DB ok, articles 4112, indexed 4431, unindexed 0, index stale, overall degraded. Counts were unchanged; no data/index operation was performed. This is not full RAG readiness or an automatic reindex instruction.
-
-LawIntegrationTest covers input, states, citations, projection, trace correlation, history/diff and session/CSRF/forced-change/deactivation. LawClientTest uses a controlled HTTP server for headers, redirects, malformed JSON, deadline and no retries. Browser and small real-provider checks supplement these; builds alone are not acceptance. Existing BIS regression remains in the local gate.
-
-### Verified on 2026-09-10
-
-- Hub implementation `09e5fb6`, final UI correction `fedf83e`; RAG `9c2d67fca773c50eca885a98b0a0b144f4dd742c`. Separate preview web 3001/API 18083 used the isolated Hub verification database and the existing RAG on 8080. Primary Hub 3000/8081 was not replaced. RAG source remained unchanged.
-- 13 integration cases and 2 HTTP client cases passed, as did the full local gate and production builds. Final CSS passed the frontend local gate and production build.
-- Three actual questions (tank export with defense, strategic export with strategic goods, general export with no area) each returned HTTP 200 / OK / five citations. Hub audit IDs matched RAG request IDs, search logs and the four expected trace stages for all three.
-- Browser checks passed for real citation expansion, two history entries, prior comparison, keyboard expansion, loading/duplicate-submit protection, controlled OK/LOW_CONFIDENCE/INSUFFICIENT_INFO/FAILED states and unavailable/timeout/invalid-response notices. Inputs survive failures; navigation discards delayed replies and watchlist navigation remains usable. HTML-looking article text remains text; absent prior IDs disable comparison.
-- Final served build was inspected at widths 1440, 768 and 390 without horizontal overflow. Login and logout/session denial were checked. Evidence and screenshots remain ignored under artifacts and output/playwright.
-- Existing RAG quality follow-up: the defense question (RAG request `17d23ff3-7736-4d41-a8aa-8e4491d49aaf`) exposed a historical interval starting 2026-07-01 and ending 2026-06-30 for the cited enforcement-decree article. Hub preserves the supplied dates; investigate in RAG rather than editing source data or inventing a correction in UI. Existing stale vector count also remains a RAG follow-up.
+Current completion evidence and remaining deployment prerequisites are recorded in the [verification guide](evaluation-harness.md). Earlier preview/deployment results remain in Git history and the historical task record.
 
 ## Owner administration
 
@@ -73,8 +56,8 @@ GET `/{section}` allows only status, laws, ingestion-runs, search-logs and agent
 
 POST `/actions/{action}` accepts only an empty JSON object and requires CSRF. Actions are sync-source (with ingestAfterSync=true), ingest-local, reindex and provider-smoke-test. RAG's configured source URL/directory/branch are used; the browser cannot supply paths or URLs. Reindex also checks RAG's enabled flag. The UI asks for confirmation before execution. These operations may update law data/vectors or invoke billed providers; no operation is performed automatically by mounting the page or deploying. A single Hub process permits one concurrent administration call. Hub audit records actor, action, correlation and start/return/failure, without raw upstream content. A returned response is not necessarily operation success: inspect reported status/counts.
 
-The existing bounded client does not retry. A timeout or browser navigation does not promise upstream cancellation; inspect status and run history before manually retrying. This is not a durable cross-process job queue. Source settings must already exist in the RAG environment; missing settings produce a safe failure. No RAG code, Git history, DB or embedding data is copied into Hub.
+The existing bounded client does not retry. A timeout or browser navigation does not promise upstream cancellation; inspect status and run history before manually retrying. This is not a durable cross-process job queue. Source settings must already exist in the RAG environment; missing settings produce a safe failure. Hub does not access law databases or write embeddings; law application code resides in the monorepo service directory.
 
-Administration verification: 14 focused cases and full local gate passed; primary API/web deployment and existing-owner browser navigation succeeded. Real reads showed 44 laws, a 424-article law detail, 6 ingestion runs and four stages for a selected request. Four action paths were intercepted in the browser; no actual mutation/provider test was sent. Hub accounts (3), BIS rows (8642), RAG articles (4112), vectors (4431) and RAG PID were unchanged. The last 390px button-wrap correction passed the frontend gate, production build and injected-CSS 390/768/1440 checks; automatic review blocked its web restart. The functional admin build is live; the final responsive build awaits manual startup and served-CSS verification.
+Administration has three tabs: operating status (summary above side-by-side actions and ingestion history), corpus, and search logs. Search logs and the selected request trace share equal-width columns, stacked at widths <=1100px. Clicking a request ID highlights its row, fills the trace input and loads that request without leaving the list. Direct UUID lookup, reset, independent loading/errors and cancellation of stale requests are supported. Before selection no unfiltered trace request is sent. Existing APIs and owner authorization are unchanged.
 
-Administration has three tabs: operating status (status, actions, then ingestion history), corpus, and search logs. Search logs and the selected request trace share equal-width columns, stacked at widths <=1100px. Clicking a request ID highlights its row, fills the trace input and loads that request without leaving the list. Direct UUID lookup, reset, independent loading/errors and cancellation of stale requests are supported. Before selection no unfiltered trace request is sent. Existing APIs and owner authorization are unchanged.
+On desktop widths above 1100px and heights of at least 760px, administration fits the available viewport with internal list scrolling. Corpus details may extend the page after selection. Smaller screens fall back to page scrolling. Corpus and trace forms bottom-align their 40px inputs and query/reset buttons. Status includes synchronization revision/time, historical source-history-change detection and severity-labelled colored notices. Historical detection is not silently cleared by index maintenance.

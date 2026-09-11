@@ -14,6 +14,8 @@ The sidebar stays visible without a collapse button or automatic hiding. Breadcr
 | 내 검색 이력 | Replay query/conditions/pinned versions; individual/all deletion |
 | 우려거래자 수집 관리 | Per-source checks/success/schedule/row count/URL/alerts and manual collection |
 | 수집 이력 | Status/stage/added/removed/unchanged/issues/held approval; result detail provides original download and version search |
+| 법령 검색 | Natural-language questions, citations, article history and comparison |
+| 법령 검색 관리 | Owner-only status, collection actions/history, corpus and linked logs/traces |
 | 내 계정 | Password change |
 | 사용자 관리 | Owner-only creation, activation/deactivation and temporary passwords |
 | 감사 이력 | Owner-only filtering by actor/action/period |

@@ -2,7 +2,7 @@
 
 [한국어](../ko/documentation-language.md) | [English](../en/documentation-language.md)
 
-This repository follows TradeOps Hub's separate Korean/English documentation model. The references inspected on 2026-09-10 were `Documentation languages and Korean UX` in local `C:\dev\tradeops_hub\AGENTS.md` and `Documentation entry points` in `PROJECT_GUIDE.md`. The [TradeOps Hub working agreement](https://github.com/yrumupusm/tradeops_hub/blob/main/AGENTS.md) is the remote reference; its revision may differ from local working documents.
+This service follows the monorepo [working agreement](../../../../AGENTS.md) and [project guide](../../../../PROJECT_GUIDE.md). Korean public documents and English implementation references describe one design and are updated together.
 
 ## Documentation Structure
 

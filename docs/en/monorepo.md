@@ -6,11 +6,11 @@ Since 2026-09-11 TradeOps Hub owns `frontend/` (integrated Korean UI), `backend/
 
 Law main `2f902ca2e2fd73b3b8b1959938eae7716991134b` and all 41 reachable commits were imported by `git subtree add` without squashing. Import commit `b52bf2170a3896a5f49d1a0fdf3a8e6accba111d` has the law revision as a parent. Before adaptations, both original and subtree hashes were `e93c93d5ec8a9c9cd4f05a957c2af208790c38ab`. Original hashes remain reachable. Older commits use the former root paths: inspect them with `git log 2f902ca -- <old-path>`.
 
-The original checkout remains intact. Ignored configuration, evidence, law sources, databases and vectors are not imported into Git. Both repository bundles are backed up under ignored artifacts. Existing processes need not restart for a source-tree change. Configure the new service directory before its next start; do not delete the old directory while a process or configured source path still refers to it.
+The old checkout has been archived under ignored artifacts, its Git objects checked and remaining duplicate files compared by hash before removal of the former active directory. Configuration, local source repositories and evidence are retained in that archive. The running law service uses the monorepo directory; the configured Markdown data source is separate. Both Git bundles remain backed up.
 
 ## Runtime and verification
 
-On 2026-09-11 the former GitHub repository was made private and the law runtime was restarted from the monorepo package with schema validation. Read-only checks confirmed unchanged 44 laws, 4112 articles, 4431 indexed articles and snapshot metadata. The existing stale index remains unchanged. The Markdown source directory is independent of the old checkout. The old checkout is no longer needed by the law process, but its archive move failed due to a directory lock; automatic approval review rejected further cleanup and cleanup-script preparation. It remains intact on disk.
+The former GitHub repository is private. Law runtime uses schema validation. Index reconciliation copied the 4,112 vectors belonging to current DB articles into a new configured collection and verified every vector/payload hash; all current articles were covered. The old 4,431-point collection and a snapshot remain recoverable. No embedding request or original-data deletion occurred; health now reports healthy. See the law runbook for maintenance constraints.
 
 Root `.env` belongs to Hub; `services/law-search/.env` belongs to law. Preserve datasource URL/driver/credentials/schema mode, providers, source paths and vector collection. Resolve relative source paths against the previous working directory. Existing PostgreSQL data must never use create-drop.
 
