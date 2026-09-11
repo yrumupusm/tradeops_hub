@@ -31,6 +31,14 @@ data, internal names, URLs, credentials, screenshots, or commit history.
 6. Check `git status --short` before and after edits. Never stage `.env`, build
    output, generated evidence, or real data.
 
+## Session handoff
+
+- Maintain a concise English handoff at `artifacts/handoff.md` when work spans sessions. This local file is Git-ignored and is not a public design document.
+- Update it at meaningful task transitions, before ending a session with unfinished work, and before context compaction when it can be anticipated. Use context pressure as an additional trigger; do not wait until context is nearly exhausted.
+- Record the current objective and completion criteria, confirmed user decisions and constraints, completed changes and verification evidence, branch/commit and uncommitted work, actual deployment state, remaining work/blockers and the next concrete step. Link to relevant files instead of copying their contents.
+- Replace stale state with a compact current summary; do not accumulate conversation transcripts. Distinguish implemented, tested and deployed work. Never include credentials, tokens or raw data.
+- On resuming work, read the handoff if present alongside `PROJECT_GUIDE.md` and `tasks/todo.md`, then verify Git and runtime state before relying on it. Current user instructions and observed state take precedence over an old handoff.
+
 ## Product invariants
 
 - Every imported row has a source file, import-run identifier, validation
