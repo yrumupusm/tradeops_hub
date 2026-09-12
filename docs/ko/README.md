@@ -22,3 +22,4 @@
 법령 검색은 별도 RAG 서비스와 연동한다. 질문·인용·조문 이력/비교와 권한·데이터 보존은 [법령 검색 통합](law-integration.md)을 참고한다.
 
 - [Monorepo](monorepo.md)
+- [현재까지 발견된 문제점](known-issues.md)

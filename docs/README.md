@@ -22,3 +22,4 @@
 | 법령 검색 통합 | [한국어](ko/law-integration.md) | [English](en/law-integration.md) |
 
 | 모노레포 운영 | [한국어](ko/monorepo.md) | [English](en/monorepo.md) |
+| 현재까지 발견된 문제점 | [한국어](ko/known-issues.md) | [English](en/known-issues.md) |
