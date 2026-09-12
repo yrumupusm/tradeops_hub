@@ -1,6 +1,6 @@
 # Issues identified so far
 
-Recorded: 2026-09-13. These are unresolved findings from today's service and presentation review. Proposed remedies are plans, not completed implementation. Existing operational limits and publication readiness remain in the [task list](../../tasks/todo.md).
+Recorded: 2026-09-13. These are unresolved findings from today's service review. Proposed remedies are plans, not completed implementation. Existing operational limits and publication readiness remain in the [task list](../../tasks/todo.md).
 
 ## Service improvements
 
@@ -27,7 +27,6 @@ Recorded: 2026-09-13. These are unresolved findings from today's service and pre
 - Citation conditions and expression checks do not guarantee correct legal interpretation or complete coverage of required conditions.
 - Direction: retain original-source review and human final-judgment guidance; evaluate answer/evidence agreement and missing conditions.
 - Acceptance: include incorrect evidence links and omitted conditions in evaluation. Do not claim complete elimination of risk.
-- Presentation guidance belongs on the law-search screen page and is omitted from the RAG structure page.
 
 ### RAG-04 — Insufficient systematic project-level quality evaluation
 
@@ -41,15 +40,7 @@ Recorded: 2026-09-13. These are unresolved findings from today's service and pre
 - [ ] Define scope, implement and verify
 - Original-name and registered-alias search works. General rules equating `Ltd` with `Limited` or `Inc` with `Incorporated` without a registered alias are not implemented.
 - Direction: define search-only abbreviation rules. Preserve original names and never merge companies by name. Do not equate `Co` and `Corp`.
-- Acceptance: verify fictional cases without registered aliases and check increased false positives. Distinguish planned expansion from implemented alias search in presentation material.
-
-## Presentation corrections
-
-- [ ] VIS-01: Correct generated `인종` to `인증` and `유자 후보 예시` to `유사 후보 예시`. Inspect enlarged Korean text in the final PDF.
-- [ ] VIS-02: Replace the law example with an actual run whose answer and evidence fit the question. Narrow browser width for readability; never synthesize or edit an answer to portray success. Screenshot replacement is separate from service quality improvement.
-- [ ] VIS-03: Reduce decorative similar-search icons and describe abbreviation examples as registered-alias search. Focus the RAG diagram on processing and model-selection reasons. Removing source links and limitations from slides does not resolve the issues.
-
-Detailed page wording/layout remains in local revision notes. Do not include images, actual search data or environment configuration in this document or Git.
+- Acceptance: verify fictional cases without registered aliases and check increased false positives.
 
 ## Resolution order and record
 

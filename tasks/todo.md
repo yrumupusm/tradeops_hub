@@ -2,11 +2,10 @@
 
 ## Review findings — 2026-09-13
 
-- [x] Record today's unresolved service and presentation findings in paired [issue documents](../docs/en/known-issues.md).
+- [x] Record today's unresolved service findings in paired [issue documents](../docs/en/known-issues.md).
 - [ ] RAG-04: establish a reproducible quality evaluation baseline.
 - [ ] RAG-01/RAG-02/RAG-03: improve long-article coverage, candidate relevance and answer/evidence verification against the baseline.
 - [ ] SEARCH-01: define and verify general English abbreviation expansion separately from registered aliases.
-- [ ] VIS-01/VIS-02/VIS-03: correct generated labels, replace the law screenshot and refine explanatory diagrams.
 
 ## Pre-publication completion review
 
